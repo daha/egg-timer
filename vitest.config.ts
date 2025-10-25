@@ -7,5 +7,6 @@ export default defineConfig({
     globals: true,
     environment: 'jsdom',
     setupFiles: './tests/setup.ts',
+    testTimeout: 15000, // 15 seconds for timer-based tests in CI
   },
 });
