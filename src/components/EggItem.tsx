@@ -46,6 +46,11 @@ export function EggItem({
               : `Add at: ${formatTime(timing.addAtSecond)}`}
           </span>
         </div>
+        {isTimeToAdd && (
+          <div className="add-now-indicator" role="alert">
+            🔔 Add this egg now!
+          </div>
+        )}
       </div>
       <button
         onClick={() => onRemove(egg.id)}
@@ -55,11 +60,6 @@ export function EggItem({
       >
         ✕
       </button>
-      {isTimeToAdd && (
-        <div className="add-now-indicator" role="alert">
-          🔔 Add this egg now!
-        </div>
-      )}
     </div>
   );
 }
