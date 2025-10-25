@@ -66,7 +66,8 @@ describe('TimerDisplay', () => {
 
     render(<TimerDisplay state={state} />);
 
-    expect(screen.getByText(/cooling/i)).toBeInTheDocument();
+    // Should show phase label "Cooling" (check for exact text to avoid ambiguity)
+    expect(screen.getByText('Cooling')).toBeInTheDocument();
     // Should show remaining cooling time: 120 - 30 = 90 seconds = 01:30
     expect(screen.getByText('01:30')).toBeInTheDocument();
     // Should show cooling progress
