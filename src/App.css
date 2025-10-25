@@ -31,6 +31,7 @@
   align-items: center;
   justify-content: center;
   gap: var(--spacing-sm);
+  font-weight: 800;
 }
 
 .app-subtitle {
@@ -119,10 +120,13 @@
 /* Egg Form Styles */
 .egg-form {
   background: var(--color-bg-primary);
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-xl);
   padding: var(--spacing-xl);
-  box-shadow: var(--shadow-md);
-  border: 1px solid var(--color-border-light);
+  box-shadow:
+    0 8px 24px rgba(0, 0, 0, 0.15),
+    0 2px 6px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(59, 130, 246, 0.1);
+  backdrop-filter: blur(10px);
 }
 
 .egg-form h2 {
@@ -168,18 +172,19 @@
 .add-button {
   background-color: var(--color-primary);
   color: #ffffff;
-  font-weight: 600;
+  font-weight: 700;
   padding: 0.75rem 1.5rem;
   margin-top: var(--spacing-sm);
   border: none;
-  box-shadow: var(--shadow-sm);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25);
   transition: all var(--transition-fast);
+  border-radius: var(--radius-lg);
 }
 
 .add-button:hover:not(:disabled) {
   background-color: var(--color-primary-dark);
   transform: translateY(-2px);
-  box-shadow: var(--shadow-md);
+  box-shadow: 0 8px 20px rgba(59, 130, 246, 0.35);
 }
 
 .add-button:active:not(:disabled) {
@@ -196,10 +201,13 @@
 /* Egg List Styles */
 .egg-list {
   background: var(--color-bg-primary);
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-xl);
   padding: var(--spacing-xl);
-  box-shadow: var(--shadow-md);
-  border: 1px solid var(--color-border-light);
+  box-shadow:
+    0 8px 24px rgba(0, 0, 0, 0.15),
+    0 2px 6px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(59, 130, 246, 0.1);
+  backdrop-filter: blur(10px);
 }
 
 .egg-list h3 {
@@ -237,17 +245,23 @@
   align-items: center;
   justify-content: space-between;
   padding: var(--spacing-lg);
-  background-color: var(--color-bg-secondary);
-  border: 2px solid var(--color-border);
-  border-radius: var(--radius-md);
+  background: linear-gradient(
+    135deg,
+    var(--color-bg-secondary) 0%,
+    rgba(30, 41, 59, 0.8) 100%
+  );
+  border: 1px solid rgba(59, 130, 246, 0.15);
+  border-radius: var(--radius-lg);
   transition: all var(--transition-fast);
   animation: fadeIn var(--transition-base);
   position: relative;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .egg-item:hover {
-  border-color: var(--color-primary-light);
-  box-shadow: var(--shadow-sm);
+  border-color: var(--color-primary);
+  box-shadow: 0 4px 16px rgba(59, 130, 246, 0.2);
+  transform: translateY(-2px);
 }
 
 .egg-item.active-egg,
@@ -317,13 +331,13 @@
 }
 
 .remove-button {
-  background-color: transparent;
+  background-color: rgba(239, 68, 68, 0.1);
   color: var(--color-error);
-  border: 1px solid var(--color-error);
+  border: 1px solid rgba(239, 68, 68, 0.3);
   padding: 0.5rem 1rem;
   font-size: 1rem;
   min-width: 2.5rem;
-  font-weight: 600;
+  font-weight: 700;
   border-radius: var(--radius-md);
   cursor: pointer;
   transition: all var(--transition-fast);
@@ -332,7 +346,9 @@
 .remove-button:hover:not(:disabled) {
   background-color: var(--color-error);
   color: #ffffff;
+  border-color: transparent;
   transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.35);
 }
 
 .remove-button:disabled {
@@ -392,15 +408,13 @@
 
 /* Timer Display Styles */
 .timer-display {
-  background: linear-gradient(
-    135deg,
-    var(--color-primary-light) 0%,
-    var(--color-primary) 100%
-  );
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
   color: #ffffff;
   border-radius: var(--radius-xl);
   padding: var(--spacing-2xl);
-  box-shadow: var(--shadow-xl);
+  box-shadow:
+    0 12px 48px rgba(59, 130, 246, 0.3),
+    0 4px 16px rgba(37, 99, 235, 0.2);
   text-align: center;
   position: relative;
   overflow: hidden;
@@ -490,10 +504,13 @@
 /* Timer Controls Styles */
 .timer-controls {
   background: var(--color-bg-primary);
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-xl);
   padding: var(--spacing-xl);
-  box-shadow: var(--shadow-md);
-  border: 1px solid var(--color-border-light);
+  box-shadow:
+    0 8px 24px rgba(0, 0, 0, 0.15),
+    0 2px 6px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(59, 130, 246, 0.1);
+  backdrop-filter: blur(10px);
   display: flex;
   flex-wrap: wrap;
   gap: var(--spacing-md);
@@ -510,37 +527,42 @@
   background-color: var(--color-success);
   color: #ffffff;
   border: none;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+  font-weight: 700;
 }
 
 .start-button:hover:not(:disabled) {
   background-color: #059669;
   transform: translateY(-2px);
-  box-shadow: var(--shadow-md);
+  box-shadow: 0 8px 20px rgba(16, 185, 129, 0.35);
 }
 
 .pause-button {
   background-color: var(--color-warning);
   color: #ffffff;
   border: none;
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.25);
+  font-weight: 700;
 }
 
 .pause-button:hover:not(:disabled) {
-  background-color: var(--color-primary-dark);
+  background-color: #d97706;
   transform: translateY(-2px);
-  box-shadow: var(--shadow-md);
+  box-shadow: 0 8px 20px rgba(245, 158, 11, 0.35);
 }
 
 .reset-button {
   background-color: transparent;
   color: var(--color-error);
   border: 2px solid var(--color-error);
+  font-weight: 700;
 }
 
 .reset-button:hover:not(:disabled) {
   background-color: var(--color-error);
   color: #ffffff;
   transform: translateY(-2px);
-  box-shadow: var(--shadow-md);
+  box-shadow: 0 8px 20px rgba(239, 68, 68, 0.35);
 }
 
 .no-eggs-message {
@@ -662,10 +684,9 @@
 
   .egg-form form {
     display: grid;
-    grid-template-columns: minmax(80px, 120px) minmax(130px, 1fr) minmax(
-        150px,
-        1fr
-      ) auto;
+    grid-template-columns:
+      minmax(80px, 120px) minmax(130px, 1fr) minmax(150px, 1fr)
+      auto;
     gap: var(--spacing-md);
     align-items: end;
   }
