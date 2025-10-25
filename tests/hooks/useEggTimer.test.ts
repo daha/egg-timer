@@ -311,6 +311,8 @@ describe('useEggTimer', () => {
   });
 
   it('increments elapsed time every second when running', async () => {
+    vi.useRealTimers(); // Use real timers for this test
+
     const { result } = renderHook(() => useEggTimer());
 
     const egg: Egg = {
@@ -327,23 +329,23 @@ describe('useEggTimer', () => {
 
     expect(result.current.state.elapsedSeconds).toBe(0);
 
-    // Advance 1 second
-    act(() => {
-      vi.advanceTimersByTime(1000);
-    });
+    // Wait for 1 second to elapse
+    await waitFor(
+      () => {
+        expect(result.current.state.elapsedSeconds).toBe(1);
+      },
+      { timeout: 1500 }
+    );
 
-    await waitFor(() => {
-      expect(result.current.state.elapsedSeconds).toBe(1);
-    });
+    // Wait for 2 more seconds (total 3 seconds)
+    await waitFor(
+      () => {
+        expect(result.current.state.elapsedSeconds).toBe(3);
+      },
+      { timeout: 2500 }
+    );
 
-    // Advance 2 more seconds
-    act(() => {
-      vi.advanceTimersByTime(2000);
-    });
-
-    await waitFor(() => {
-      expect(result.current.state.elapsedSeconds).toBe(3);
-    });
+    vi.useFakeTimers(); // Restore fake timers
   });
 
   it('does not increment time when paused', async () => {
