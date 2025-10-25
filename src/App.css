@@ -49,7 +49,7 @@
     var(--color-info) 0%,
     var(--color-secondary) 100%
   );
-  color: var(--color-text-inverse);
+  color: #ffffff;
   padding: var(--spacing-lg);
   border-radius: var(--radius-lg);
   margin-top: var(--spacing-lg);
@@ -70,20 +70,20 @@
 }
 
 .permission-buttons .btn-primary {
-  background-color: var(--color-text-inverse);
+  background-color: #ffffff;
   color: var(--color-info);
   border: none;
 }
 
 .permission-buttons .btn-primary:hover {
-  background-color: var(--color-bg-secondary);
+  background-color: #e0e7ff;
   transform: translateY(-2px);
   box-shadow: var(--shadow-md);
 }
 
 .permission-buttons .btn-secondary {
   background-color: rgba(255, 255, 255, 0.2);
-  color: var(--color-text-inverse);
+  color: #ffffff;
   border: 1px solid rgba(255, 255, 255, 0.3);
 }
 
@@ -155,8 +155,8 @@
 }
 
 .error-message {
-  background-color: #fee2e2;
-  color: var(--color-error);
+  background-color: rgba(239, 68, 68, 0.1);
+  color: #fca5a5;
   padding: var(--spacing-sm) var(--spacing-md);
   border-radius: var(--radius-md);
   font-size: 0.875rem;
@@ -167,7 +167,7 @@
 
 .add-button {
   background-color: var(--color-primary);
-  color: var(--color-text-inverse);
+  color: #ffffff;
   font-weight: 600;
   padding: 0.75rem 1.5rem;
   margin-top: var(--spacing-sm);
@@ -236,7 +236,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: var(--spacing-md);
+  padding: var(--spacing-lg);
   background-color: var(--color-bg-secondary);
   border: 2px solid var(--color-border);
   border-radius: var(--radius-md);
@@ -251,8 +251,8 @@
 
 .egg-item.active-egg {
   border-color: var(--color-success);
-  background-color: #ecfdf5;
-  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+  background-color: rgba(16, 185, 129, 0.15);
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
   animation: pulse 2s infinite;
 }
 
@@ -265,7 +265,7 @@
   display: flex;
   align-items: center;
   gap: var(--spacing-md);
-  margin-bottom: var(--spacing-xs);
+  margin-bottom: var(--spacing-sm);
 }
 
 .egg-icon {
@@ -301,12 +301,12 @@
 
 .delete-button:hover:not(:disabled) {
   background-color: var(--color-error);
-  color: var(--color-text-inverse);
+  color: #ffffff;
 }
 
 .add-now-badge {
   background-color: var(--color-success);
-  color: var(--color-text-inverse);
+  color: #ffffff;
   padding: 0.375rem 0.75rem;
   border-radius: var(--radius-full);
   font-size: 0.75rem;
@@ -333,7 +333,7 @@
     var(--color-primary-light) 0%,
     var(--color-primary) 100%
   );
-  color: var(--color-text-inverse);
+  color: #ffffff;
   border-radius: var(--radius-xl);
   padding: var(--spacing-2xl);
   box-shadow: var(--shadow-xl);
@@ -444,7 +444,7 @@
 
 .start-button {
   background-color: var(--color-success);
-  color: var(--color-text-inverse);
+  color: #ffffff;
   border: none;
 }
 
@@ -456,7 +456,7 @@
 
 .pause-button {
   background-color: var(--color-warning);
-  color: var(--color-text-inverse);
+  color: #ffffff;
   border: none;
 }
 
@@ -474,7 +474,7 @@
 
 .reset-button:hover:not(:disabled) {
   background-color: var(--color-error);
-  color: var(--color-text-inverse);
+  color: #ffffff;
   transform: translateY(-2px);
   box-shadow: var(--shadow-md);
 }
@@ -521,17 +521,17 @@
 
 .notification-banner.type-add_egg {
   border-left-color: var(--color-success);
-  background-color: #ecfdf5;
+  background-color: rgba(16, 185, 129, 0.15);
 }
 
 .notification-banner.type-boiling_done {
   border-left-color: var(--color-primary);
-  background-color: #fef3c7;
+  background-color: rgba(59, 130, 246, 0.15);
 }
 
 .notification-banner.type-cooling_done {
   border-left-color: var(--color-info);
-  background-color: #dbeafe;
+  background-color: rgba(59, 130, 246, 0.15);
 }
 
 .notification-content {

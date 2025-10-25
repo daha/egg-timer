@@ -10,10 +10,10 @@
   --font-size-base: 16px;
   --line-height-base: 1.6;
 
-  /* Color Palette - Egg-themed */
-  --color-primary: #f59e0b; /* Amber - egg yolk */
-  --color-primary-dark: #d97706;
-  --color-primary-light: #fbbf24;
+  /* Color Palette - Dark Mode with Blue Theme */
+  --color-primary: #3b82f6; /* Blue */
+  --color-primary-dark: #2563eb;
+  --color-primary-light: #60a5fa;
 
   --color-secondary: #8b5cf6; /* Purple accent */
   --color-secondary-dark: #7c3aed;
@@ -23,20 +23,20 @@
   --color-error: #ef4444; /* Red */
   --color-info: #3b82f6; /* Blue */
 
-  /* Neutral Colors */
-  --color-bg-primary: #ffffff;
-  --color-bg-secondary: #f9fafb;
-  --color-bg-tertiary: #f3f4f6;
-  --color-bg-hover: #e5e7eb;
+  /* Neutral Colors - Dark Mode */
+  --color-bg-primary: #1e293b; /* Dark slate */
+  --color-bg-secondary: #0f172a; /* Darker slate */
+  --color-bg-tertiary: #334155; /* Lighter slate */
+  --color-bg-hover: #475569;
 
-  --color-text-primary: #111827;
-  --color-text-secondary: #6b7280;
-  --color-text-tertiary: #9ca3af;
-  --color-text-inverse: #ffffff;
+  --color-text-primary: #f1f5f9; /* Light text */
+  --color-text-secondary: #cbd5e1; /* Medium light text */
+  --color-text-tertiary: #94a3b8; /* Dimmer text */
+  --color-text-inverse: #0f172a; /* Dark text for light backgrounds */
 
-  --color-border: #e5e7eb;
-  --color-border-light: #f3f4f6;
-  --color-border-dark: #d1d5db;
+  --color-border: #334155;
+  --color-border-light: #1e293b;
+  --color-border-dark: #475569;
 
   /* Spacing (8px grid system) */
   --spacing-xs: 0.25rem; /* 4px */
@@ -181,7 +181,7 @@ button:disabled {
 
 /* Focus styles for accessibility (WCAG AA) */
 button:focus-visible {
-  outline: 3px solid var(--color-primary);
+  outline: 3px solid var(--color-primary-light);
   outline-offset: 2px;
 }
 
