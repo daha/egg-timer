@@ -349,6 +349,8 @@ describe('useEggTimer', () => {
   });
 
   it('does not increment time when paused', async () => {
+    vi.useRealTimers(); // Use real timers for this test
+
     const { result } = renderHook(() => useEggTimer());
 
     const egg: Egg = {
@@ -363,27 +365,26 @@ describe('useEggTimer', () => {
       result.current.startTimer();
     });
 
-    // Advance 2 seconds
-    act(() => {
-      vi.advanceTimersByTime(2000);
-    });
-
-    await waitFor(() => {
-      expect(result.current.state.elapsedSeconds).toBe(2);
-    });
+    // Wait for 2 seconds to elapse
+    await waitFor(
+      () => {
+        expect(result.current.state.elapsedSeconds).toBe(2);
+      },
+      { timeout: 2500 }
+    );
 
     // Pause
     act(() => {
       result.current.pauseTimer();
     });
 
-    // Advance 3 more seconds while paused
-    act(() => {
-      vi.advanceTimersByTime(3000);
-    });
+    // Wait 1.5 seconds while paused
+    await new Promise((resolve) => setTimeout(resolve, 1500));
 
-    // Should still be at 2
+    // Should still be at 2 (not incrementing while paused)
     expect(result.current.state.elapsedSeconds).toBe(2);
+
+    vi.useFakeTimers(); // Restore fake timers
   });
 
   it('transitions from running to cooling when boiling is complete', async () => {
