@@ -662,7 +662,10 @@
 
   .egg-form form {
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr auto;
+    grid-template-columns: minmax(80px, 120px) minmax(130px, 1fr) minmax(
+        150px,
+        1fr
+      ) auto;
     gap: var(--spacing-md);
     align-items: end;
   }
