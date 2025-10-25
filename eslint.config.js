@@ -58,5 +58,19 @@ export default [
       },
     },
   },
+  // Test file specific configuration
+  {
+    files: ['tests/**/*.{ts,tsx}', '**/*.test.{ts,tsx}', '**/*.spec.{ts,tsx}'],
+    languageOptions: {
+      globals: {
+        global: 'readonly',
+        HTMLInputElement: 'readonly',
+        HTMLSelectElement: 'readonly',
+        HTMLButtonElement: 'readonly',
+        HTMLElement: 'readonly',
+        Storage: 'readonly',
+      },
+    },
+  },
   prettier,
 ];

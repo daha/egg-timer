@@ -1,4 +1,3 @@
-/* eslint-disable no-undef */
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { loadEggs, saveEggs, clearStorage } from '../../src/utils/storage';
 import { Egg } from '../../src/types';
