@@ -61,9 +61,14 @@ function playSound() {
 
 function playBeep() {
   try {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const AudioContextClass =
-      (window as any).AudioContext || (window as any).webkitAudioContext;
+    type AudioContextConstructor = new () => AudioContext;
+
+    const win = window as Window & {
+      AudioContext?: AudioContextConstructor;
+      webkitAudioContext?: AudioContextConstructor;
+    };
+
+    const AudioContextClass = win.AudioContext || win.webkitAudioContext;
     if (!AudioContextClass) {
       throw new Error('AudioContext not supported');
     }
