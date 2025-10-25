@@ -32,6 +32,8 @@ export default [
         Notification: 'readonly',
         Audio: 'readonly',
         crypto: 'readonly',
+        setInterval: 'readonly',
+        clearInterval: 'readonly',
       },
     },
     plugins: {
