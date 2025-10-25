@@ -5,9 +5,16 @@ import {
   Notification as AppNotification,
 } from '../../src/hooks/useNotifications';
 
+/* eslint-disable @typescript-eslint/no-unused-vars */
 describe('useNotifications', () => {
   // Mock the browser Notification API
-  const mockNotificationConstructor = vi.fn();
+  const mockNotificationConstructor = vi.fn(function (
+    this: unknown,
+    _title: string,
+    _options?: unknown
+  ) {
+    // Mock constructor implementation
+  });
   const mockRequestPermission = vi.fn();
 
   beforeEach(() => {
@@ -23,10 +30,11 @@ describe('useNotifications', () => {
     global.Notification.permission = 'default';
     global.Notification.requestPermission = mockRequestPermission;
 
-    // Mock Audio
-    global.Audio = vi.fn().mockImplementation(() => ({
-      play: vi.fn().mockResolvedValue(undefined),
-    })) as unknown as typeof Audio;
+    // Mock Audio - needs to be a proper constructor too
+
+    global.Audio = vi.fn(function (this: unknown, _src: string) {
+      this.play = vi.fn().mockResolvedValue(undefined);
+    }) as unknown as typeof Audio;
   });
 
   it('initializes with default permission when Notification API available', () => {
@@ -85,7 +93,11 @@ describe('useNotifications', () => {
 
   it('sends browser notification when permission is granted', () => {
     global.Notification.permission = 'granted';
-    mockNotificationConstructor.mockImplementation(() => ({}));
+    mockNotificationConstructor.mockImplementation(function (
+      this: unknown,
+      __title: string,
+      _options?: unknown
+    ) {});
 
     const { result } = renderHook(() => useNotifications());
 
@@ -142,9 +154,9 @@ describe('useNotifications', () => {
 
   it('plays sound when sending notification', () => {
     const mockPlay = vi.fn().mockResolvedValue(undefined);
-    global.Audio = vi.fn().mockImplementation(() => ({
-      play: mockPlay,
-    })) as unknown as typeof Audio;
+    global.Audio = vi.fn(function (this: unknown, __src: string) {
+      this.play = mockPlay;
+    }) as unknown as typeof Audio;
 
     global.Notification.permission = 'granted';
 
@@ -167,9 +179,9 @@ describe('useNotifications', () => {
 
   it('plays sound even when notification permission is denied', () => {
     const mockPlay = vi.fn().mockResolvedValue(undefined);
-    global.Audio = vi.fn().mockImplementation(() => ({
-      play: mockPlay,
-    })) as unknown as typeof Audio;
+    global.Audio = vi.fn(function (this: unknown, __src: string) {
+      this.play = mockPlay;
+    }) as unknown as typeof Audio;
 
     global.Notification.permission = 'denied';
 
@@ -193,7 +205,11 @@ describe('useNotifications', () => {
 
   it('sends notification with different types correctly', () => {
     global.Notification.permission = 'granted';
-    mockNotificationConstructor.mockImplementation(() => ({}));
+    mockNotificationConstructor.mockImplementation(function (
+      this: unknown,
+      __title: string,
+      _options?: unknown
+    ) {});
 
     const { result } = renderHook(() => useNotifications());
 
@@ -219,12 +235,8 @@ describe('useNotifications', () => {
   });
 
   it('returns denied when Notification API is not available', async () => {
-    // Remove Notification API
-    Object.defineProperty(global, 'Notification', {
-      writable: true,
-      configurable: true,
-      value: undefined,
-    });
+    // Remove Notification API from window check
+    delete (global as Record<string, unknown>).Notification;
 
     const { result } = renderHook(() => useNotifications());
 
@@ -238,9 +250,9 @@ describe('useNotifications', () => {
 
   it('handles audio play errors gracefully', () => {
     const mockPlay = vi.fn().mockRejectedValue(new Error('Audio play failed'));
-    global.Audio = vi.fn().mockImplementation(() => ({
-      play: mockPlay,
-    })) as unknown as typeof Audio;
+    global.Audio = vi.fn(function (this: unknown, __src: string) {
+      this.play = mockPlay;
+    }) as unknown as typeof Audio;
 
     global.Notification.permission = 'granted';
 
