@@ -68,6 +68,7 @@ export default [
         HTMLSelectElement: 'readonly',
         HTMLButtonElement: 'readonly',
         HTMLElement: 'readonly',
+        HTMLFormElement: 'readonly',
         Storage: 'readonly',
       },
     },

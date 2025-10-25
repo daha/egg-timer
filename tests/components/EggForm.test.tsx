@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { EggForm } from '../../src/components/EggForm';
 import { Egg } from '../../src/types';
@@ -117,16 +117,18 @@ describe('EggForm', () => {
     render(<EggForm onAddEgg={mockOnAddEgg} disabled={false} />);
 
     const weightInput = screen.getByLabelText(/weight/i);
-    const submitButton = screen.getByRole('button', { name: /add egg/i });
+    const form = weightInput.closest('form') as HTMLFormElement;
 
     // Try to add egg with weight < 20
     await user.clear(weightInput);
     await user.type(weightInput, '15');
-    await user.click(submitButton);
 
-    // Should show error
+    // Submit form using fireEvent to bypass HTML5 validation
+    fireEvent.submit(form);
+
+    // Should show error (wait for it to appear)
     expect(
-      screen.getByText(/weight must be between 20 and 100 grams/i)
+      await screen.findByText(/weight must be between 20 and 100 grams/i)
     ).toBeInTheDocument();
 
     // Should NOT call onAddEgg
@@ -139,16 +141,18 @@ describe('EggForm', () => {
     render(<EggForm onAddEgg={mockOnAddEgg} disabled={false} />);
 
     const weightInput = screen.getByLabelText(/weight/i);
-    const submitButton = screen.getByRole('button', { name: /add egg/i });
+    const form = weightInput.closest('form') as HTMLFormElement;
 
     // Try to add egg with weight > 100
     await user.clear(weightInput);
     await user.type(weightInput, '150');
-    await user.click(submitButton);
 
-    // Should show error
+    // Submit form using fireEvent to bypass HTML5 validation
+    fireEvent.submit(form);
+
+    // Should show error (wait for it to appear)
     expect(
-      screen.getByText(/weight must be between 20 and 100 grams/i)
+      await screen.findByText(/weight must be between 20 and 100 grams/i)
     ).toBeInTheDocument();
 
     // Should NOT call onAddEgg
@@ -161,16 +165,17 @@ describe('EggForm', () => {
     render(<EggForm onAddEgg={mockOnAddEgg} disabled={false} />);
 
     const weightInput = screen.getByLabelText(/weight/i);
-    const submitButton = screen.getByRole('button', { name: /add egg/i });
+    const form = weightInput.closest('form') as HTMLFormElement;
 
-    // Try to add egg with invalid weight
+    // Try to add egg with invalid weight (clear it to make it empty/NaN)
     await user.clear(weightInput);
-    await user.type(weightInput, 'abc');
-    await user.click(submitButton);
 
-    // Should show error
+    // Submit form using fireEvent to bypass HTML5 validation
+    fireEvent.submit(form);
+
+    // Should show error (wait for it to appear)
     expect(
-      screen.getByText(/please enter a valid weight/i)
+      await screen.findByText(/please enter a valid weight/i)
     ).toBeInTheDocument();
 
     // Should NOT call onAddEgg
