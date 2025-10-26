@@ -70,6 +70,7 @@ This project uses **Husky** to manage Git hooks. On every commit, the following 
 ### Available Scripts
 
 - `npm run dev` - Start development server
+- `npm run dev -- --host` - Start development server and bind to all IPs in the host
 - `npm run build` - Build for production
 - `npm run preview` - Preview production build
 - `npm run test` - Run tests in watch mode
