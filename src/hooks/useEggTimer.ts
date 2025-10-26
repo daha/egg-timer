@@ -13,7 +13,15 @@ type TimerAction =
   | { type: 'TICK' }
   | { type: 'START_COOLING' }
   | { type: 'COMPLETE' }
-  | { type: 'RESTORE_EGGS'; payload: Egg[] };
+  | { type: 'RESTORE_EGGS'; payload: Egg[] }
+  | {
+      type: 'RESTORE_TIMER_STATE';
+      payload: {
+        status: TimerState['status'];
+        elapsedSeconds: number;
+        coolingElapsed: number;
+      };
+    };
 
 // Initial state
 const initialState: TimerState = {
@@ -188,6 +196,16 @@ function timerReducer(state: TimerState, action: TimerAction): TimerState {
       };
     }
 
+    case 'RESTORE_TIMER_STATE': {
+      // Restore timer state (status, elapsed time) from localStorage
+      return {
+        ...state,
+        status: action.payload.status,
+        elapsedSeconds: action.payload.elapsedSeconds,
+        coolingElapsed: action.payload.coolingElapsed,
+      };
+    }
+
     default:
       return state;
   }
@@ -233,6 +251,17 @@ export function useEggTimer() {
     dispatch({ type: 'RESTORE_EGGS', payload: eggs });
   }, []);
 
+  const restoreTimerState = useCallback(
+    (timerState: {
+      status: TimerState['status'];
+      elapsedSeconds: number;
+      coolingElapsed: number;
+    }) => {
+      dispatch({ type: 'RESTORE_TIMER_STATE', payload: timerState });
+    },
+    []
+  );
+
   const removeAllEggs = useCallback(() => {
     dispatch({ type: 'REMOVE_ALL_EGGS' });
   }, []);
@@ -246,6 +275,7 @@ export function useEggTimer() {
     pauseTimer,
     resetTimer,
     restoreEggs,
+    restoreTimerState,
   };
 }
 

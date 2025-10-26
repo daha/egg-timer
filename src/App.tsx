@@ -24,6 +24,7 @@ function App() {
     pauseTimer,
     resetTimer,
     restoreEggs,
+    restoreTimerState,
   } = useEggTimer();
 
   const { permission, requestPermission, sendNotification } =
@@ -64,7 +65,10 @@ function App() {
   useLocalStorage({
     eggs: state.eggs,
     status: state.status,
+    elapsedSeconds: state.elapsedSeconds,
+    coolingElapsed: state.coolingElapsed,
     restoreEggs,
+    restoreTimerState,
   });
 
   // Calculate active notifications based on current state
