@@ -20,6 +20,8 @@ type TimerAction =
         status: TimerState['status'];
         elapsedSeconds: number;
         coolingElapsed: number;
+        boilingEndTime: number | null;
+        coolingEndTime: number | null;
       };
     };
 
@@ -31,6 +33,8 @@ const initialState: TimerState = {
   status: 'idle',
   elapsedSeconds: 0,
   coolingElapsed: 0,
+  boilingEndTime: null,
+  coolingEndTime: null,
 };
 
 // Reducer function
@@ -97,9 +101,14 @@ function timerReducer(state: TimerState, action: TimerAction): TimerState {
         return state;
       }
 
+      const now = Date.now();
+      const remainingTime = state.totalTime - state.elapsedSeconds;
+      const boilingEndTime = now + remainingTime * 1000;
+
       return {
         ...state,
         status: 'running',
+        boilingEndTime,
       };
     }
 
@@ -112,6 +121,7 @@ function timerReducer(state: TimerState, action: TimerAction): TimerState {
       return {
         ...state,
         status: 'paused',
+        boilingEndTime: null, // Clear end time when paused
       };
     }
 
@@ -121,21 +131,36 @@ function timerReducer(state: TimerState, action: TimerAction): TimerState {
         status: 'idle',
         elapsedSeconds: 0,
         coolingElapsed: 0,
+        boilingEndTime: null,
+        coolingEndTime: null,
       };
     }
 
     case 'TICK': {
       // Only tick when running or cooling
       if (state.status === 'running') {
-        const newElapsed = state.elapsedSeconds + 1;
+        if (!state.boilingEndTime) {
+          // Safety check - shouldn't happen
+          return state;
+        }
+
+        const now = Date.now();
+        const timeRemaining = Math.max(0, state.boilingEndTime - now);
+        const newElapsed = Math.min(
+          state.totalTime,
+          state.totalTime - Math.floor(timeRemaining / 1000)
+        );
 
         // Check if boiling is complete
         if (newElapsed >= state.totalTime) {
+          const coolingEndTime = now + 120 * 1000; // 2 minutes from now
           return {
             ...state,
-            elapsedSeconds: newElapsed,
+            elapsedSeconds: state.totalTime,
             status: 'cooling',
             coolingElapsed: 0,
+            boilingEndTime: null,
+            coolingEndTime,
           };
         }
 
@@ -144,14 +169,25 @@ function timerReducer(state: TimerState, action: TimerAction): TimerState {
           elapsedSeconds: newElapsed,
         };
       } else if (state.status === 'cooling') {
-        const newCoolingElapsed = state.coolingElapsed + 1;
+        if (!state.coolingEndTime) {
+          // Safety check - shouldn't happen
+          return state;
+        }
+
+        const now = Date.now();
+        const timeRemaining = Math.max(0, state.coolingEndTime - now);
+        const newCoolingElapsed = Math.min(
+          120,
+          120 - Math.floor(timeRemaining / 1000)
+        );
 
         // Check if cooling is complete (120 seconds = 2 minutes)
         if (newCoolingElapsed >= 120) {
           return {
             ...state,
-            coolingElapsed: newCoolingElapsed,
+            coolingElapsed: 120,
             status: 'complete',
+            coolingEndTime: null,
           };
         }
 
@@ -165,10 +201,14 @@ function timerReducer(state: TimerState, action: TimerAction): TimerState {
     }
 
     case 'START_COOLING': {
+      const now = Date.now();
+      const coolingEndTime = now + 120 * 1000; // 2 minutes from now
       return {
         ...state,
         status: 'cooling',
         coolingElapsed: 0,
+        boilingEndTime: null,
+        coolingEndTime,
       };
     }
 
@@ -197,12 +237,14 @@ function timerReducer(state: TimerState, action: TimerAction): TimerState {
     }
 
     case 'RESTORE_TIMER_STATE': {
-      // Restore timer state (status, elapsed time) from localStorage
+      // Restore timer state (status, elapsed time, timestamps) from localStorage
       return {
         ...state,
         status: action.payload.status,
         elapsedSeconds: action.payload.elapsedSeconds,
         coolingElapsed: action.payload.coolingElapsed,
+        boilingEndTime: action.payload.boilingEndTime,
+        coolingEndTime: action.payload.coolingEndTime,
       };
     }
 
@@ -256,6 +298,8 @@ export function useEggTimer() {
       status: TimerState['status'];
       elapsedSeconds: number;
       coolingElapsed: number;
+      boilingEndTime: number | null;
+      coolingEndTime: number | null;
     }) => {
       dispatch({ type: 'RESTORE_TIMER_STATE', payload: timerState });
     },

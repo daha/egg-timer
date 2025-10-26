@@ -14,11 +14,15 @@ interface UseLocalStorageOptions {
   status: TimerState['status'];
   elapsedSeconds: number;
   coolingElapsed: number;
+  boilingEndTime: number | null;
+  coolingEndTime: number | null;
   restoreEggs: (eggs: Egg[]) => void;
   restoreTimerState: (state: {
     status: TimerState['status'];
     elapsedSeconds: number;
     coolingElapsed: number;
+    boilingEndTime: number | null;
+    coolingEndTime: number | null;
   }) => void;
 }
 
@@ -31,6 +35,8 @@ export function useLocalStorage({
   status,
   elapsedSeconds,
   coolingElapsed,
+  boilingEndTime,
+  coolingEndTime,
   restoreEggs,
   restoreTimerState,
 }: UseLocalStorageOptions) {
@@ -52,19 +58,14 @@ export function useLocalStorage({
         (storedTimerState.status === 'running' ||
           storedTimerState.status === 'cooling')
       ) {
-        // Calculate time elapsed since save
-        const now = Date.now();
-        const timeSinceSave = Math.floor(
-          (now - storedTimerState.savedAt) / 1000
-        );
-
-        // Add elapsed time to the saved state
-        const adjustedElapsed = storedTimerState.elapsedSeconds + timeSinceSave;
-
+        // Timestamps are absolute, so we can restore them directly
+        // The TICK action will calculate elapsed time based on current time vs end time
         restoreTimerState({
           status: storedTimerState.status,
-          elapsedSeconds: adjustedElapsed,
+          elapsedSeconds: storedTimerState.elapsedSeconds,
           coolingElapsed: storedTimerState.coolingElapsed,
+          boilingEndTime: storedTimerState.boilingEndTime,
+          coolingEndTime: storedTimerState.coolingEndTime,
         });
       }
 
@@ -93,12 +94,18 @@ export function useLocalStorage({
     }
 
     if (status === 'running' || status === 'cooling') {
-      saveTimerState({ status, elapsedSeconds, coolingElapsed });
+      saveTimerState({
+        status,
+        elapsedSeconds,
+        coolingElapsed,
+        boilingEndTime,
+        coolingEndTime,
+      });
     } else if (status === 'idle' || status === 'complete') {
       // Clear timer state when idle or complete
       clearTimerState();
     }
-  }, [status, elapsedSeconds, coolingElapsed]);
+  }, [status, elapsedSeconds, coolingElapsed, boilingEndTime, coolingEndTime]);
 
   // Return a function to manually clear storage
   const clearStorage = () => {

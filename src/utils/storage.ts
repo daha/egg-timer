@@ -9,6 +9,8 @@ interface StoredData {
     elapsedSeconds: number;
     coolingElapsed: number;
     savedAt: number; // timestamp when saved
+    boilingEndTime: number | null;
+    coolingEndTime: number | null;
   };
   version: number; // for future migrations
 }
@@ -83,7 +85,14 @@ export function saveEggs(eggs: Egg[]): void {
  * @param state - Timer state to save
  */
 export function saveTimerState(
-  state: Pick<TimerState, 'status' | 'elapsedSeconds' | 'coolingElapsed'>
+  state: Pick<
+    TimerState,
+    | 'status'
+    | 'elapsedSeconds'
+    | 'coolingElapsed'
+    | 'boilingEndTime'
+    | 'coolingEndTime'
+  >
 ): void {
   try {
     // Load existing data to preserve eggs
@@ -99,6 +108,8 @@ export function saveTimerState(
         elapsedSeconds: state.elapsedSeconds,
         coolingElapsed: state.coolingElapsed,
         savedAt: Date.now(),
+        boilingEndTime: state.boilingEndTime,
+        coolingEndTime: state.coolingEndTime,
       },
       version: 1,
     };

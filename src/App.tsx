@@ -67,6 +67,8 @@ function App() {
     status: state.status,
     elapsedSeconds: state.elapsedSeconds,
     coolingElapsed: state.coolingElapsed,
+    boilingEndTime: state.boilingEndTime,
+    coolingEndTime: state.coolingEndTime,
     restoreEggs,
     restoreTimerState,
   });

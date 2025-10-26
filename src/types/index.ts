@@ -21,6 +21,8 @@ export interface TimerState {
   status: 'idle' | 'running' | 'paused' | 'cooling' | 'complete';
   elapsedSeconds: number;
   coolingElapsed: number;
+  boilingEndTime: number | null; // timestamp when boiling should complete
+  coolingEndTime: number | null; // timestamp when cooling should complete
 }
 
 // Wake Lock API types are included in TypeScript 5.6+ lib.dom.d.ts
