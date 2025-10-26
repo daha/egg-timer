@@ -39,8 +39,15 @@ export function useNotifications() {
       });
     }
 
-    // Play sound
-    playSound();
+    // Play sound - use loud alert for boiling_done and cooling_done
+    if (
+      notification.type === 'boiling_done' ||
+      notification.type === 'cooling_done'
+    ) {
+      playLoudAlert();
+    } else {
+      playSound();
+    }
   };
 
   return {
@@ -114,5 +121,51 @@ function playBeep() {
     }, 100);
   } catch (error) {
     console.error('Failed to play beep sound:', error);
+  }
+}
+
+function playLoudAlert() {
+  try {
+    type AudioContextConstructor = new () => AudioContext;
+
+    const win = window as Window & {
+      AudioContext?: AudioContextConstructor;
+      webkitAudioContext?: AudioContextConstructor;
+    };
+
+    const AudioContextClass = win.AudioContext || win.webkitAudioContext;
+    if (!AudioContextClass) {
+      throw new Error('AudioContext not supported');
+    }
+    const audioContext = new AudioContextClass();
+
+    // Play a sequence of 3 loud beeps to get attention
+    const frequencies = [880, 1046, 1318]; // A5, C6, E6 (pleasant chord)
+    const delays = [0, 300, 600]; // Staggered timing
+
+    frequencies.forEach((freq, index) => {
+      window.setTimeout(() => {
+        const oscillator = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
+
+        oscillator.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+
+        oscillator.frequency.value = freq;
+        oscillator.type = 'sine';
+
+        // Louder volume (0.5 instead of 0.3)
+        gainNode.gain.setValueAtTime(0.5, audioContext.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(
+          0.01,
+          audioContext.currentTime + 0.3
+        );
+
+        oscillator.start(audioContext.currentTime);
+        oscillator.stop(audioContext.currentTime + 0.3);
+      }, delays[index]);
+    });
+  } catch (error) {
+    console.error('Failed to play loud alert sound:', error);
   }
 }
