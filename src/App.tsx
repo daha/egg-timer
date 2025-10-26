@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import './App.css';
 import { useEggTimer } from './hooks/useEggTimer';
 import { useLocalStorage } from './hooks/useLocalStorage';
@@ -8,7 +8,10 @@ import { EggForm } from './components/EggForm';
 import { EggList } from './components/EggList';
 import { TimerDisplay } from './components/TimerDisplay';
 import { TimerControls } from './components/TimerControls';
-import { NotificationBanner } from './components/NotificationBanner';
+import {
+  NotificationBanner,
+  NotificationBannerRef,
+} from './components/NotificationBanner';
 
 function App() {
   const {
@@ -27,6 +30,8 @@ function App() {
 
   const [dismissedPermissionBanner, setDismissedPermissionBanner] =
     useState(false);
+
+  const notificationBannerRef = useRef<NotificationBannerRef>(null);
 
   // Integrate localStorage persistence
   useLocalStorage({
@@ -75,6 +80,11 @@ function App() {
     setDismissedPermissionBanner(true);
   };
 
+  const handleRemoveAllEggs = () => {
+    removeAllEggs();
+    notificationBannerRef.current?.clearAll();
+  };
+
   // Determine if controls should be disabled
   const isTimerActive =
     state.status === 'running' || state.status === 'cooling';
@@ -104,7 +114,10 @@ function App() {
       </header>
 
       <main className="app-main">
-        <NotificationBanner notifications={notifications} />
+        <NotificationBanner
+          ref={notificationBannerRef}
+          notifications={notifications}
+        />
 
         <div className="app-layout">
           <section className="input-section">
@@ -128,7 +141,7 @@ function App() {
               onStart={startTimer}
               onPause={pauseTimer}
               onReset={resetTimer}
-              onRemoveAllEggs={removeAllEggs}
+              onRemoveAllEggs={handleRemoveAllEggs}
             />
           </section>
         </div>

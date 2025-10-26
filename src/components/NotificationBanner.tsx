@@ -1,19 +1,39 @@
-import { useEffect, useState, useRef } from 'react';
+import {
+  useEffect,
+  useState,
+  useRef,
+  useImperativeHandle,
+  forwardRef,
+} from 'react';
 import { Notification } from '../hooks/useNotifications';
 
 interface NotificationBannerProps {
   notifications: Notification[];
 }
 
+export interface NotificationBannerRef {
+  clearAll: () => void;
+}
+
 interface DisplayNotification extends Notification {
   id: number;
 }
 
-export function NotificationBanner({ notifications }: NotificationBannerProps) {
+export const NotificationBanner = forwardRef<
+  NotificationBannerRef,
+  NotificationBannerProps
+>(({ notifications }, ref) => {
   const [displayNotifications, setDisplayNotifications] = useState<
     DisplayNotification[]
   >([]);
   const notificationCountRef = useRef(0);
+
+  // Expose clearAll method via ref
+  useImperativeHandle(ref, () => ({
+    clearAll: () => {
+      setDisplayNotifications([]);
+    },
+  }));
 
   // Add new notifications when the notifications prop changes
   useEffect(() => {
@@ -82,4 +102,6 @@ export function NotificationBanner({ notifications }: NotificationBannerProps) {
       ))}
     </div>
   );
-}
+});
+
+NotificationBanner.displayName = 'NotificationBanner';
