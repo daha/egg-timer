@@ -163,8 +163,8 @@ describe('useNotifications', () => {
     const { result } = renderHook(() => useNotifications());
 
     const notification: AppNotification = {
-      type: 'cooling_done',
-      message: 'Cooling complete!',
+      type: 'add_egg',
+      message: 'Add egg now!',
     };
 
     act(() => {
