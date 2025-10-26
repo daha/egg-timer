@@ -8,6 +8,7 @@ import { useEffect, useRef } from 'react';
  * @param isActive - Whether the wake lock should be active
  */
 export function useWakeLock(isActive: boolean) {
+  // WakeLockSentinel is defined in lib.dom.d.ts but ESLint doesn't see it
   // eslint-disable-next-line no-undef
   const wakeLockRef = useRef<WakeLockSentinel | null>(null);
 

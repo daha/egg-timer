@@ -23,21 +23,5 @@ export interface TimerState {
   coolingElapsed: number;
 }
 
-// Wake Lock API types
-// https://developer.mozilla.org/en-US/docs/Web/API/Screen_Wake_Lock_API
-declare global {
-  // eslint-disable-next-line no-undef
-  interface WakeLockSentinel extends EventTarget {
-    readonly released: boolean;
-    readonly type: 'screen';
-    release(): Promise<void>;
-  }
-
-  interface WakeLock {
-    request(type: 'screen'): Promise<WakeLockSentinel>;
-  }
-
-  interface Navigator {
-    wakeLock?: WakeLock;
-  }
-}
+// Wake Lock API types are included in TypeScript 5.6+ lib.dom.d.ts
+// Reference: https://developer.mozilla.org/en-US/docs/Web/API/Screen_Wake_Lock_API
