@@ -17,7 +17,7 @@ describe('EggForm', () => {
     ).toBeInTheDocument();
   });
 
-  it('has default values: 50g, medium, refrigerated', () => {
+  it('has default values: 65g, medium, refrigerated', () => {
     const mockOnAddEgg = vi.fn();
     render(<EggForm onAddEgg={mockOnAddEgg} disabled={false} />);
 
@@ -29,7 +29,7 @@ describe('EggForm', () => {
       /temperature/i
     ) as HTMLSelectElement;
 
-    expect(weightInput.value).toBe('50');
+    expect(weightInput.value).toBe('65');
     expect(donenessSelect.value).toBe('medium');
     expect(temperatureSelect.value).toBe('refrigerated');
   });
@@ -106,7 +106,7 @@ describe('EggForm', () => {
     await user.click(submitButton);
 
     // Check form reset to defaults
-    expect(weightInput.value).toBe('50');
+    expect(weightInput.value).toBe('65');
     expect(donenessSelect.value).toBe('medium');
     expect(temperatureSelect.value).toBe('refrigerated');
   });
