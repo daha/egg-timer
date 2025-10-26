@@ -6,6 +6,7 @@ interface TimerControlsProps {
   onStart: () => void;
   onPause: () => void;
   onReset: () => void;
+  onRemoveAllEggs: () => void;
 }
 
 export function TimerControls({
@@ -13,6 +14,7 @@ export function TimerControls({
   onStart,
   onPause,
   onReset,
+  onRemoveAllEggs,
 }: TimerControlsProps) {
   const [showResetConfirm, setShowResetConfirm] = useState(false);
 
@@ -90,8 +92,8 @@ export function TimerControls({
         )}
 
         {status === 'idle' && eggs.length > 0 && (
-          <button onClick={onReset} className="btn-reset-idle">
-            Clear All
+          <button onClick={onRemoveAllEggs} className="btn-reset-idle">
+            Remove All Eggs
           </button>
         )}
       </div>

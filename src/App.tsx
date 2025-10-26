@@ -15,6 +15,7 @@ function App() {
     state,
     addEgg,
     removeEgg,
+    removeAllEggs,
     startTimer,
     pauseTimer,
     resetTimer,
@@ -127,6 +128,7 @@ function App() {
               onStart={startTimer}
               onPause={pauseTimer}
               onReset={resetTimer}
+              onRemoveAllEggs={removeAllEggs}
             />
           </section>
         </div>

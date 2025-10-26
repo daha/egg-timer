@@ -6,6 +6,7 @@ import { calculateEggTimings, getTotalTime } from '../core/eggCalculations';
 type TimerAction =
   | { type: 'ADD_EGG'; payload: Egg }
   | { type: 'REMOVE_EGG'; payload: string }
+  | { type: 'REMOVE_ALL_EGGS' }
   | { type: 'START_TIMER' }
   | { type: 'PAUSE_TIMER' }
   | { type: 'RESET_TIMER' }
@@ -60,6 +61,20 @@ function timerReducer(state: TimerState, action: TimerAction): TimerState {
         eggs: newEggs,
         timings: newTimings,
         totalTime: newTotalTime,
+      };
+    }
+
+    case 'REMOVE_ALL_EGGS': {
+      // Cannot remove eggs while timer is running or cooling
+      if (state.status === 'running' || state.status === 'cooling') {
+        return state;
+      }
+
+      return {
+        ...state,
+        eggs: [],
+        timings: [],
+        totalTime: 0,
       };
     }
 
@@ -218,10 +233,15 @@ export function useEggTimer() {
     dispatch({ type: 'RESTORE_EGGS', payload: eggs });
   }, []);
 
+  const removeAllEggs = useCallback(() => {
+    dispatch({ type: 'REMOVE_ALL_EGGS' });
+  }, []);
+
   return {
     state,
     addEgg,
     removeEgg,
+    removeAllEggs,
     startTimer,
     pauseTimer,
     resetTimer,
