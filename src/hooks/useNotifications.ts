@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 export type NotificationType = 'add_egg' | 'boiling_done' | 'cooling_done';
 
@@ -19,6 +19,31 @@ export function useNotifications() {
   const [permission, setPermission] = useState<
     'default' | 'granted' | 'denied'
   >(getInitialPermission());
+
+  // Poll for permission changes (especially important for iOS Safari)
+  useEffect(() => {
+    if (!('Notification' in window)) return;
+
+    // Set up polling to detect permission changes
+    // iOS Safari may not trigger events or sync state immediately, so we poll
+    const checkPermission = () => {
+      const currentPermission = Notification.permission as
+        | 'default'
+        | 'granted'
+        | 'denied';
+      setPermission(currentPermission);
+    };
+
+    // Check immediately on mount
+    checkPermission();
+
+    // Then poll every second to detect changes
+    const intervalId = setInterval(checkPermission, 1000);
+
+    return () => clearInterval(intervalId);
+    // Empty deps - we want this effect to run once on mount and set up polling
+    // The interval will continuously sync the latest permission state
+  }, []);
 
   const requestPermission = async () => {
     if ('Notification' in window) {
