@@ -7,7 +7,7 @@ interface EggFormProps {
 }
 
 export function EggForm({ onAddEgg, disabled }: EggFormProps) {
-  const [weight, setWeight] = useState<string>('50');
+  const [weight, setWeight] = useState<string>('65');
   const [doneness, setDoneness] = useState<DonenessLevel>('medium');
   const [temperature, setTemperature] =
     useState<TemperatureLevel>('refrigerated');
@@ -41,7 +41,7 @@ export function EggForm({ onAddEgg, disabled }: EggFormProps) {
     onAddEgg(newEgg);
 
     // Reset form to defaults
-    setWeight('50');
+    setWeight('65');
     setDoneness('medium');
     setTemperature('refrigerated');
   };
