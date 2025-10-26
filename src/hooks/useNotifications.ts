@@ -61,7 +61,10 @@ export function useNotifications() {
   const requestPermission = async () => {
     if (!('Notification' in window)) {
       console.error('Notifications not supported in this browser');
-      window.alert('Notifications are not supported in this browser');
+      // Type assertion needed because TypeScript narrows window to never in this block
+      (window as Window).alert(
+        'Notifications are not supported in this browser'
+      );
       return 'denied';
     }
 
