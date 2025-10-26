@@ -10,8 +10,14 @@ export interface Notification {
 
 function getInitialPermission(): 'default' | 'granted' | 'denied' {
   if (typeof window !== 'undefined' && 'Notification' in window) {
-    return Notification.permission as 'default' | 'granted' | 'denied';
+    const permission = Notification.permission as
+      | 'default'
+      | 'granted'
+      | 'denied';
+    console.log('Initial notification permission:', permission);
+    return permission;
   }
+  console.log('Notification API not available');
   return 'default';
 }
 
@@ -53,18 +59,39 @@ export function useNotifications() {
   }, []);
 
   const requestPermission = async () => {
-    if ('Notification' in window) {
-      console.log(
-        'Requesting notification permission, current:',
-        Notification.permission
+    if (!('Notification' in window)) {
+      console.error('Notifications not supported in this browser');
+      window.alert('Notifications are not supported in this browser');
+      return 'denied';
+    }
+
+    console.log(
+      'Requesting notification permission, current:',
+      Notification.permission
+    );
+
+    // Check if we're in a secure context (required for iOS Safari)
+    const isSecureContext = window.isSecureContext;
+    console.log('Is secure context:', isSecureContext);
+
+    if (!isSecureContext) {
+      console.warn(
+        'Not in secure context (HTTPS or localhost). iOS Safari may not support notifications.'
       );
+    }
+
+    try {
       const result = await Notification.requestPermission();
       console.log('Permission request result:', result);
       setPermission(result);
       return result;
+    } catch (error) {
+      console.error('Error requesting notification permission:', error);
+      window.alert(
+        'Failed to request notification permission. This may not be supported on your device/browser over HTTP.'
+      );
+      return 'denied';
     }
-    console.log('Notifications not supported, returning denied');
-    return 'denied';
   };
 
   const sendNotification = (notification: Notification) => {

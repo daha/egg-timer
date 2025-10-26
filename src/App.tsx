@@ -126,6 +126,12 @@ function App() {
         {showPermissionBanner && permission === 'default' && (
           <div className="permission-banner">
             <p>Enable notifications to be alerted when to add eggs!</p>
+            {!window.isSecureContext && (
+              <p className="warning-text" style={{ fontSize: '0.9em' }}>
+                ⚠️ Notifications may not work over HTTP. For full support, use
+                HTTPS.
+              </p>
+            )}
             <div className="permission-buttons">
               <button onClick={handleRequestPermission} className="btn-primary">
                 Enable Notifications
