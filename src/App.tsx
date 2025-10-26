@@ -3,6 +3,7 @@ import './App.css';
 import { useEggTimer } from './hooks/useEggTimer';
 import { useLocalStorage } from './hooks/useLocalStorage';
 import { useNotifications } from './hooks/useNotifications';
+import { useWakeLock } from './hooks/useWakeLock';
 import { getActiveNotifications } from './core/notificationScheduler';
 import { EggForm } from './components/EggForm';
 import { EggList } from './components/EggList';
@@ -27,6 +28,11 @@ function App() {
 
   const { permission, requestPermission, sendNotification } =
     useNotifications();
+
+  // Keep screen awake when timer is running or cooling
+  const shouldStayAwake =
+    state.status === 'running' || state.status === 'cooling';
+  useWakeLock(shouldStayAwake);
 
   // Persist banner dismissal in localStorage
   const [dismissedPermissionBanner, setDismissedPermissionBanner] = useState(
