@@ -28,8 +28,29 @@ function App() {
   const { permission, requestPermission, sendNotification } =
     useNotifications();
 
-  const [dismissedPermissionBanner, setDismissedPermissionBanner] =
-    useState(false);
+  // Persist banner dismissal in localStorage
+  const [dismissedPermissionBanner, setDismissedPermissionBanner] = useState(
+    () => {
+      try {
+        const stored = localStorage.getItem('notification-banner-dismissed');
+        return stored === 'true';
+      } catch {
+        return false;
+      }
+    }
+  );
+
+  // Save dismissal state to localStorage
+  useEffect(() => {
+    try {
+      localStorage.setItem(
+        'notification-banner-dismissed',
+        String(dismissedPermissionBanner)
+      );
+    } catch (error) {
+      console.error('Failed to save banner dismissal state:', error);
+    }
+  }, [dismissedPermissionBanner]);
 
   const notificationBannerRef = useRef<NotificationBannerRef>(null);
 
@@ -67,13 +88,20 @@ function App() {
     sendNotification,
   ]);
 
+  // Auto-dismiss banner if permission is granted or denied
+  useEffect(() => {
+    if (permission !== 'default') {
+      setDismissedPermissionBanner(true);
+    }
+  }, [permission]);
+
   // Show permission banner if permission is default and not dismissed
   const showPermissionBanner =
     permission === 'default' && !dismissedPermissionBanner;
 
   const handleRequestPermission = async () => {
     await requestPermission();
-    setDismissedPermissionBanner(true);
+    // Banner will be auto-dismissed when permission changes
   };
 
   const handleDismissPermissionBanner = () => {

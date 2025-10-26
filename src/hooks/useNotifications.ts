@@ -22,7 +22,10 @@ export function useNotifications() {
 
   // Poll for permission changes (especially important for iOS Safari)
   useEffect(() => {
-    if (!('Notification' in window)) return;
+    if (!('Notification' in window)) {
+      console.log('Notifications API not supported');
+      return;
+    }
 
     // Set up polling to detect permission changes
     // iOS Safari may not trigger events or sync state immediately, so we poll
@@ -31,6 +34,7 @@ export function useNotifications() {
         | 'default'
         | 'granted'
         | 'denied';
+      console.log('Checking notification permission:', currentPermission);
       setPermission(currentPermission);
     };
 
@@ -40,17 +44,26 @@ export function useNotifications() {
     // Then poll every second to detect changes
     const intervalId = setInterval(checkPermission, 1000);
 
-    return () => clearInterval(intervalId);
+    return () => {
+      console.log('Cleaning up notification permission polling');
+      clearInterval(intervalId);
+    };
     // Empty deps - we want this effect to run once on mount and set up polling
     // The interval will continuously sync the latest permission state
   }, []);
 
   const requestPermission = async () => {
     if ('Notification' in window) {
+      console.log(
+        'Requesting notification permission, current:',
+        Notification.permission
+      );
       const result = await Notification.requestPermission();
+      console.log('Permission request result:', result);
       setPermission(result);
       return result;
     }
+    console.log('Notifications not supported, returning denied');
     return 'denied';
   };
 
