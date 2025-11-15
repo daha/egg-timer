@@ -231,24 +231,8 @@ describe('notificationScheduler', () => {
       });
     });
 
-    it(`should return "cooling done" notification when cooling elapsed is ${COOLING_TIME_SECONDS} seconds`, () => {
-      const notifications = getActiveNotifications(
-        mockTimings,
-        400,
-        400,
-        COOLING_TIME_SECONDS, // coolingElapsed
-        'cooling'
-      );
-
-      expect(notifications).toHaveLength(1);
-      expect(notifications[0]).toEqual({
-        type: 'cooling_done',
-        message: 'Cooling complete! Your eggs are ready.',
-      });
-    });
-
-    it('should return "cooling done" notification even if timer skips past the exact second', () => {
-      // First, simulate being just before the threshold
+    it('should return "cooling done" notification when transitioning to complete', () => {
+      // First, simulate being in cooling state
       getActiveNotifications(
         mockTimings,
         400,
@@ -257,13 +241,13 @@ describe('notificationScheduler', () => {
         'cooling'
       );
 
-      // Then skip past the threshold
+      // Now transition to complete (this is when cooling finishes)
       const notifications = getActiveNotifications(
         mockTimings,
         400,
         400,
-        COOLING_TIME_SECONDS + 2, // Skip 2 seconds past
-        'cooling'
+        COOLING_TIME_SECONDS, // coolingElapsed
+        'complete' // Status transitions to complete when cooling finishes
       );
 
       expect(notifications).toHaveLength(1);
@@ -273,22 +257,44 @@ describe('notificationScheduler', () => {
       });
     });
 
-    it('should not return "cooling done" when status is not cooling', () => {
-      // First setup: transition to cooling to trigger boiling_done
-      getActiveNotifications(mockTimings, 399, 400, 0, 'running');
-      getActiveNotifications(mockTimings, 400, 400, 0, 'cooling');
+    it('should not return "cooling done" when already in complete state', () => {
+      // Simulate already being in complete state (not transitioning)
+      getActiveNotifications(
+        mockTimings,
+        400,
+        400,
+        COOLING_TIME_SECONDS,
+        'complete'
+      );
 
-      // Now check that cooling_done doesn't fire when going back to running
-      // (This is a hypothetical scenario to test the status check)
+      // Call again while still in complete
       const notifications = getActiveNotifications(
         mockTimings,
         400,
         400,
         COOLING_TIME_SECONDS,
-        'running' // status is running, not cooling
+        'complete'
       );
 
-      // Should not return cooling_done since status is not cooling
+      expect(notifications).toEqual([]);
+    });
+
+    it('should not return "cooling done" when not transitioning from cooling to complete', () => {
+      // Setup: go through normal flow
+      getActiveNotifications(mockTimings, 399, 400, 0, 'running');
+      getActiveNotifications(mockTimings, 400, 400, 0, 'cooling');
+
+      // Hypothetical: transition to 'running' instead of 'complete'
+      // (This shouldn't happen in practice, but tests the status check)
+      const notifications = getActiveNotifications(
+        mockTimings,
+        400,
+        400,
+        COOLING_TIME_SECONDS,
+        'running' // Not transitioning to 'complete'
+      );
+
+      // Should not fire cooling_done because we didn't transition cooling -> complete
       expect(notifications).toEqual([]);
     });
 
