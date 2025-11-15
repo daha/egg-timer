@@ -1,5 +1,9 @@
-import { describe, it, expect } from 'vitest';
-import { getActiveNotifications } from '../../src/core/notificationScheduler';
+import { describe, it, expect, beforeEach } from 'vitest';
+import {
+  getActiveNotifications,
+  COOLING_TIME_SECONDS,
+  resetNotificationState,
+} from '../../src/core/notificationScheduler';
 import { EggTiming, TimerState } from '../../src/types';
 
 describe('notificationScheduler', () => {
@@ -9,6 +13,11 @@ describe('notificationScheduler', () => {
       { eggId: 'egg2', boilTime: 350, addAtSecond: 50 },
       { eggId: 'egg3', boilTime: 300, addAtSecond: 100 },
     ];
+
+    // Reset notification state before each test
+    beforeEach(() => {
+      resetNotificationState();
+    });
 
     it('should return empty array when no notifications are due', () => {
       const notifications = getActiveNotifications(
@@ -22,7 +31,7 @@ describe('notificationScheduler', () => {
       expect(notifications).toEqual([]);
     });
 
-    it('should return "add egg" notification when elapsed time matches addAtSecond', () => {
+    it('should return "add egg" notification when elapsed time matches or exceeds addAtSecond', () => {
       const notifications = getActiveNotifications(
         mockTimings,
         0, // elapsedSeconds - matches egg1
@@ -37,6 +46,59 @@ describe('notificationScheduler', () => {
         message: 'Add egg #1 to the pot now!',
         eggId: 'egg1',
       });
+    });
+
+    it('should return "add egg" notification even if timer skips past addAtSecond', () => {
+      // First, simulate being at second 49
+      getActiveNotifications(mockTimings, 49, 400, 0, 'running');
+
+      // Then skip to second 52 (missing 50 and 51)
+      const notifications = getActiveNotifications(
+        mockTimings,
+        52, // elapsedSeconds - skipped past egg2's addAtSecond of 50
+        400,
+        0,
+        'running'
+      );
+
+      expect(notifications).toHaveLength(1);
+      expect(notifications[0]).toEqual({
+        type: 'add_egg',
+        message: 'Add egg #2 to the pot now!',
+        eggId: 'egg2',
+      });
+    });
+
+    it('should not send duplicate notifications for same egg', () => {
+      // First call at exact second
+      let notifications = getActiveNotifications(
+        mockTimings,
+        50,
+        400,
+        0,
+        'running'
+      );
+      expect(notifications).toHaveLength(1);
+
+      // Second call at same second (e.g., rapid re-render)
+      notifications = getActiveNotifications(
+        mockTimings,
+        50,
+        400,
+        0,
+        'running'
+      );
+      expect(notifications).toHaveLength(0);
+
+      // Third call after the second (should still not notify)
+      notifications = getActiveNotifications(
+        mockTimings,
+        51,
+        400,
+        0,
+        'running'
+      );
+      expect(notifications).toHaveLength(0);
     });
 
     it('should return notification for second egg when its time comes', () => {
@@ -101,12 +163,38 @@ describe('notificationScheduler', () => {
       expect(notifications).toEqual([]);
     });
 
-    it('should return "cooling done" notification when cooling elapsed is 120 seconds', () => {
+    it(`should return "cooling done" notification when cooling elapsed is ${COOLING_TIME_SECONDS} seconds`, () => {
       const notifications = getActiveNotifications(
         mockTimings,
         400,
         400,
-        120, // coolingElapsed - 2 minutes
+        COOLING_TIME_SECONDS, // coolingElapsed
+        'cooling'
+      );
+
+      expect(notifications).toHaveLength(1);
+      expect(notifications[0]).toEqual({
+        type: 'cooling_done',
+        message: 'Cooling complete! Your eggs are ready.',
+      });
+    });
+
+    it('should return "cooling done" notification even if timer skips past the exact second', () => {
+      // First, simulate being just before the threshold
+      getActiveNotifications(
+        mockTimings,
+        400,
+        400,
+        COOLING_TIME_SECONDS - 1,
+        'cooling'
+      );
+
+      // Then skip past the threshold
+      const notifications = getActiveNotifications(
+        mockTimings,
+        400,
+        400,
+        COOLING_TIME_SECONDS + 2, // Skip 2 seconds past
         'cooling'
       );
 
@@ -122,7 +210,7 @@ describe('notificationScheduler', () => {
         mockTimings,
         400,
         400,
-        120,
+        COOLING_TIME_SECONDS,
         'running' // status is running, not cooling
       );
 
@@ -183,12 +271,12 @@ describe('notificationScheduler', () => {
       });
     });
 
-    it('should not trigger cooling done before 120 seconds', () => {
+    it(`should not trigger cooling done before ${COOLING_TIME_SECONDS} seconds`, () => {
       const notifications = getActiveNotifications(
         mockTimings,
         400,
         400,
-        119, // One second before cooling done
+        COOLING_TIME_SECONDS - 1, // One second before cooling done
         'cooling'
       );
 

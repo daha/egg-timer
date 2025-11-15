@@ -455,7 +455,7 @@ describe('useEggTimer', () => {
     });
   });
 
-  it.skip('transitions from cooling to complete after 120 seconds', async () => {
+  it.skip('transitions from cooling to complete after 150 seconds', async () => {
     const { result } = renderHook(() => useEggTimer());
 
     const egg: Egg = {
@@ -472,9 +472,9 @@ describe('useEggTimer', () => {
 
     const totalTime = result.current.state.totalTime;
 
-    // Complete boiling and cooling (totalTime + 120 seconds)
+    // Complete boiling and cooling (totalTime + 150 seconds)
     act(() => {
-      vi.advanceTimersByTime((totalTime + 120) * 1000);
+      vi.advanceTimersByTime((totalTime + 150) * 1000);
     });
 
     await waitFor(() => {
@@ -633,16 +633,16 @@ describe('getBoilingTimeRemaining', () => {
 
 describe('getCoolingTimeRemaining', () => {
   it('calculates remaining cooling time correctly', () => {
-    expect(getCoolingTimeRemaining(0)).toBe(120);
-    expect(getCoolingTimeRemaining(30)).toBe(90);
-    expect(getCoolingTimeRemaining(60)).toBe(60);
+    expect(getCoolingTimeRemaining(0)).toBe(150);
+    expect(getCoolingTimeRemaining(30)).toBe(120);
+    expect(getCoolingTimeRemaining(75)).toBe(75);
   });
 
   it('returns 0 when cooling is complete', () => {
-    expect(getCoolingTimeRemaining(120)).toBe(0);
+    expect(getCoolingTimeRemaining(150)).toBe(0);
   });
 
-  it('returns 0 when cooling exceeds 120 seconds', () => {
-    expect(getCoolingTimeRemaining(150)).toBe(0);
+  it('returns 0 when cooling exceeds 150 seconds', () => {
+    expect(getCoolingTimeRemaining(180)).toBe(0);
   });
 });

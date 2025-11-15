@@ -4,6 +4,7 @@ import {
   getCoolingTimeRemaining,
   formatTime,
 } from '../hooks/useEggTimer';
+import { COOLING_TIME_SECONDS } from '../core/notificationScheduler';
 
 interface TimerDisplayProps {
   state: TimerState;
@@ -35,7 +36,7 @@ export function TimerDisplay({ state }: TimerDisplayProps) {
   } else if (status === 'cooling') {
     const remaining = getCoolingTimeRemaining(coolingElapsed);
     displayTime = formatTime(remaining);
-    progressPercent = (coolingElapsed / 120) * 100;
+    progressPercent = (coolingElapsed / COOLING_TIME_SECONDS) * 100;
     phaseLabel = 'Cooling';
   } else if (status === 'complete') {
     statusMessage = 'All done!';
@@ -65,7 +66,8 @@ export function TimerDisplay({ state }: TimerDisplayProps) {
 
       {status === 'cooling' && (
         <div className="cooling-info">
-          Cooling: {formatTime(coolingElapsed)} / 02:00
+          Cooling: {formatTime(coolingElapsed)} /{' '}
+          {formatTime(COOLING_TIME_SECONDS)}
         </div>
       )}
     </div>

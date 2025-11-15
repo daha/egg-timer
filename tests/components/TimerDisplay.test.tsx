@@ -68,10 +68,10 @@ describe('TimerDisplay', () => {
 
     // Should show phase label "Cooling" (check for exact text to avoid ambiguity)
     expect(screen.getByText('Cooling')).toBeInTheDocument();
-    // Should show remaining cooling time: 120 - 30 = 90 seconds = 01:30
-    expect(screen.getByText('01:30')).toBeInTheDocument();
+    // Should show remaining cooling time: 150 - 30 = 120 seconds = 02:00
+    expect(screen.getByText('02:00')).toBeInTheDocument();
     // Should show cooling progress
-    expect(screen.getByText(/cooling: 00:30 \/ 02:00/i)).toBeInTheDocument();
+    expect(screen.getByText(/cooling: 00:30 \/ 02:30/i)).toBeInTheDocument();
   });
 
   it('shows "All done!" when status is complete', () => {
@@ -81,7 +81,7 @@ describe('TimerDisplay', () => {
       totalTime: 300,
       status: 'complete',
       elapsedSeconds: 300,
-      coolingElapsed: 120,
+      coolingElapsed: 150,
     };
 
     render(<TimerDisplay state={state} />);
@@ -212,7 +212,7 @@ describe('TimerDisplay', () => {
 
     // Should NOT show cooling info when running
     expect(
-      screen.queryByText(/cooling: \d+:\d+ \/ 02:00/i)
+      screen.queryByText(/cooling: \d+:\d+ \/ 02:30/i)
     ).not.toBeInTheDocument();
 
     // Now switch to cooling
@@ -225,8 +225,8 @@ describe('TimerDisplay', () => {
 
     rerender(<TimerDisplay state={coolingState} />);
 
-    // Should show cooling info
-    expect(screen.getByText(/cooling: 01:00 \/ 02:00/i)).toBeInTheDocument();
+    // Should show cooling info (150 - 60 = 90 seconds remaining = 01:30)
+    expect(screen.getByText(/cooling: 01:00 \/ 02:30/i)).toBeInTheDocument();
   });
 
   it('displays phase label correctly for different statuses', () => {

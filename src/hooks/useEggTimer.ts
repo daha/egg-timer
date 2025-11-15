@@ -1,6 +1,7 @@
 import { useReducer, useEffect, useCallback } from 'react';
 import { Egg, TimerState, EggTiming } from '../types';
 import { calculateEggTimings, getTotalTime } from '../core/eggCalculations';
+import { COOLING_TIME_SECONDS } from '../core/notificationScheduler';
 
 // Action types
 type TimerAction =
@@ -153,7 +154,7 @@ function timerReducer(state: TimerState, action: TimerAction): TimerState {
 
         // Check if boiling is complete
         if (newElapsed >= state.totalTime) {
-          const coolingEndTime = now + 120 * 1000; // 2 minutes from now
+          const coolingEndTime = now + COOLING_TIME_SECONDS * 1000;
           return {
             ...state,
             elapsedSeconds: state.totalTime,
@@ -177,15 +178,15 @@ function timerReducer(state: TimerState, action: TimerAction): TimerState {
         const now = Date.now();
         const timeRemaining = Math.max(0, state.coolingEndTime - now);
         const newCoolingElapsed = Math.min(
-          120,
-          120 - Math.floor(timeRemaining / 1000)
+          COOLING_TIME_SECONDS,
+          COOLING_TIME_SECONDS - Math.floor(timeRemaining / 1000)
         );
 
-        // Check if cooling is complete (120 seconds = 2 minutes)
-        if (newCoolingElapsed >= 120) {
+        // Check if cooling is complete
+        if (newCoolingElapsed >= COOLING_TIME_SECONDS) {
           return {
             ...state,
-            coolingElapsed: 120,
+            coolingElapsed: COOLING_TIME_SECONDS,
             status: 'complete',
             coolingEndTime: null,
           };
@@ -202,7 +203,7 @@ function timerReducer(state: TimerState, action: TimerAction): TimerState {
 
     case 'START_COOLING': {
       const now = Date.now();
-      const coolingEndTime = now + 120 * 1000; // 2 minutes from now
+      const coolingEndTime = now + COOLING_TIME_SECONDS * 1000;
       return {
         ...state,
         status: 'cooling',
@@ -341,7 +342,7 @@ export function getBoilingTimeRemaining(
 
 // Helper to get time remaining for cooling phase
 export function getCoolingTimeRemaining(coolingElapsed: number): number {
-  return Math.max(0, 120 - coolingElapsed);
+  return Math.max(0, COOLING_TIME_SECONDS - coolingElapsed);
 }
 
 // Helper to format seconds as MM:SS
