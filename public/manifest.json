@@ -4,10 +4,28 @@
   "description": "An intelligent egg timer for boiling multiple eggs with different preferences in the same pot",
   "start_url": "/egg-timer/",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#4CAF50",
+  "background_color": "#3b82f6",
+  "theme_color": "#3b82f6",
   "orientation": "portrait",
   "icons": [
+    {
+      "src": "/egg-timer/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/egg-timer/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/egg-timer/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any"
+    },
     {
       "src": "/egg-timer/icon-192.svg",
       "sizes": "192x192",
@@ -19,12 +37,6 @@
       "sizes": "512x512",
       "type": "image/svg+xml",
       "purpose": "any maskable"
-    },
-    {
-      "src": "/egg-timer/vite.svg",
-      "sizes": "any",
-      "type": "image/svg+xml",
-      "purpose": "any"
     }
   ],
   "categories": ["utilities", "lifestyle"],
