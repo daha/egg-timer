@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 export type NotificationType = 'add_egg' | 'boiling_done' | 'cooling_done';
 
@@ -6,6 +6,15 @@ export interface Notification {
   type: NotificationType;
   message: string;
   eggId?: string;
+}
+
+// Detect if running on iOS
+function isIOS(): boolean {
+  if (typeof window === 'undefined') return false;
+  return (
+    /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)
+  );
 }
 
 function getInitialPermission(): 'default' | 'granted' | 'denied' {
@@ -25,6 +34,47 @@ export function useNotifications() {
   const [permission, setPermission] = useState<
     'default' | 'granted' | 'denied'
   >(getInitialPermission());
+  const [audioReady, setAudioReady] = useState(false);
+  const audioContextRef = useRef<AudioContext | null>(null);
+
+  // Initialize audio context on user interaction (required for iOS)
+  const initializeAudio = () => {
+    if (audioReady) return true;
+
+    try {
+      type AudioContextConstructor = new () => AudioContext;
+      const win = window as Window & {
+        AudioContext?: AudioContextConstructor;
+        webkitAudioContext?: AudioContextConstructor;
+      };
+
+      const AudioContextClass = win.AudioContext || win.webkitAudioContext;
+      if (!AudioContextClass) {
+        console.log('AudioContext not supported');
+        return false;
+      }
+
+      if (!audioContextRef.current) {
+        audioContextRef.current = new AudioContextClass();
+        console.log('AudioContext created');
+      }
+
+      // Resume audio context if suspended (common on iOS)
+      if (audioContextRef.current.state === 'suspended') {
+        audioContextRef.current.resume().then(() => {
+          console.log('AudioContext resumed');
+          setAudioReady(true);
+        });
+      } else {
+        setAudioReady(true);
+      }
+
+      return true;
+    } catch (error) {
+      console.error('Failed to initialize audio:', error);
+      return false;
+    }
+  };
 
   // Poll for permission changes (especially important for iOS Safari)
   useEffect(() => {
@@ -107,14 +157,28 @@ export function useNotifications() {
       });
     }
 
+    // Vibration for mobile devices (works on iOS in some contexts)
+    if ('vibrate' in navigator) {
+      if (
+        notification.type === 'boiling_done' ||
+        notification.type === 'cooling_done'
+      ) {
+        // Long vibration pattern for important alerts
+        navigator.vibrate([200, 100, 200, 100, 200]);
+      } else {
+        // Short vibration for add egg notifications
+        navigator.vibrate(200);
+      }
+    }
+
     // Play sound - use loud alert for boiling_done and cooling_done
     if (
       notification.type === 'boiling_done' ||
       notification.type === 'cooling_done'
     ) {
-      playLoudAlert();
+      playLoudAlert(audioContextRef.current, audioReady);
     } else {
-      playSound();
+      playSound(audioContextRef.current, audioReady);
     }
   };
 
@@ -122,90 +186,123 @@ export function useNotifications() {
     permission,
     requestPermission,
     sendNotification,
+    initializeAudio,
+    audioReady,
+    isIOS: isIOS(),
   };
 }
 
-function playSound() {
-  // Try to play MP3 file first
-  const audio = new Audio('/egg-timer/sounds/notification.mp3');
-  audio.play().catch(() => {
-    // Fallback to Web Audio API generated beep
-    playBeep();
-  });
+function playSound(audioContext: AudioContext | null, audioReady: boolean) {
+  // If audio is ready and we have a context, use it
+  if (audioReady && audioContext) {
+    playBeep(audioContext);
+    return;
+  }
+
+  // Fallback: Try to play HTML5 audio (may not work on iOS without user interaction)
+  try {
+    const audio = new Audio('/egg-timer/sounds/notification.mp3');
+    audio.play().catch((error) => {
+      console.log('HTML5 audio playback failed:', error);
+      // Try to create a new audio context as last resort
+      playBeep(null);
+    });
+  } catch (error) {
+    console.error('Failed to create audio element:', error);
+  }
 }
 
-function playBeep() {
+function playBeep(audioContext: AudioContext | null) {
   try {
-    type AudioContextConstructor = new () => AudioContext;
+    let context = audioContext;
 
-    const win = window as Window & {
-      AudioContext?: AudioContextConstructor;
-      webkitAudioContext?: AudioContextConstructor;
-    };
+    // If no context provided, try to create one
+    if (!context) {
+      type AudioContextConstructor = new () => AudioContext;
+      const win = window as Window & {
+        AudioContext?: AudioContextConstructor;
+        webkitAudioContext?: AudioContextConstructor;
+      };
 
-    const AudioContextClass = win.AudioContext || win.webkitAudioContext;
-    if (!AudioContextClass) {
-      throw new Error('AudioContext not supported');
+      const AudioContextClass = win.AudioContext || win.webkitAudioContext;
+      if (!AudioContextClass) {
+        throw new Error('AudioContext not supported');
+      }
+      context = new AudioContextClass();
     }
-    const audioContext = new AudioContextClass();
-    const oscillator = audioContext.createOscillator();
-    const gainNode = audioContext.createGain();
+
+    // Resume context if suspended
+    if (context.state === 'suspended') {
+      context.resume();
+    }
+
+    const oscillator = context.createOscillator();
+    const gainNode = context.createGain();
 
     oscillator.connect(gainNode);
-    gainNode.connect(audioContext.destination);
+    gainNode.connect(context.destination);
 
     // Create a pleasant two-tone notification sound
     oscillator.frequency.value = 800; // Hz
     oscillator.type = 'sine';
 
-    gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+    gainNode.gain.setValueAtTime(0.3, context.currentTime);
     gainNode.gain.exponentialRampToValueAtTime(
       0.01,
-      audioContext.currentTime + 0.15
+      context.currentTime + 0.15
     );
 
-    oscillator.start(audioContext.currentTime);
-    oscillator.stop(audioContext.currentTime + 0.15);
+    oscillator.start(context.currentTime);
+    oscillator.stop(context.currentTime + 0.15);
 
     // Second tone
     window.setTimeout(() => {
-      const oscillator2 = audioContext.createOscillator();
-      const gainNode2 = audioContext.createGain();
+      const oscillator2 = context!.createOscillator();
+      const gainNode2 = context!.createGain();
 
       oscillator2.connect(gainNode2);
-      gainNode2.connect(audioContext.destination);
+      gainNode2.connect(context!.destination);
 
       oscillator2.frequency.value = 1000;
       oscillator2.type = 'sine';
 
-      gainNode2.gain.setValueAtTime(0.3, audioContext.currentTime);
+      gainNode2.gain.setValueAtTime(0.3, context!.currentTime);
       gainNode2.gain.exponentialRampToValueAtTime(
         0.01,
-        audioContext.currentTime + 0.15
+        context!.currentTime + 0.15
       );
 
-      oscillator2.start(audioContext.currentTime);
-      oscillator2.stop(audioContext.currentTime + 0.15);
+      oscillator2.start(context!.currentTime);
+      oscillator2.stop(context!.currentTime + 0.15);
     }, 100);
   } catch (error) {
     console.error('Failed to play beep sound:', error);
   }
 }
 
-function playLoudAlert() {
+function playLoudAlert(audioContext: AudioContext | null, audioReady: boolean) {
   try {
-    type AudioContextConstructor = new () => AudioContext;
+    let context = audioContext;
 
-    const win = window as Window & {
-      AudioContext?: AudioContextConstructor;
-      webkitAudioContext?: AudioContextConstructor;
-    };
+    // If no context provided or not ready, try to create one
+    if (!audioReady || !context) {
+      type AudioContextConstructor = new () => AudioContext;
+      const win = window as Window & {
+        AudioContext?: AudioContextConstructor;
+        webkitAudioContext?: AudioContextConstructor;
+      };
 
-    const AudioContextClass = win.AudioContext || win.webkitAudioContext;
-    if (!AudioContextClass) {
-      throw new Error('AudioContext not supported');
+      const AudioContextClass = win.AudioContext || win.webkitAudioContext;
+      if (!AudioContextClass) {
+        throw new Error('AudioContext not supported');
+      }
+      context = new AudioContextClass();
     }
-    const audioContext = new AudioContextClass();
+
+    // Resume context if suspended
+    if (context.state === 'suspended') {
+      context.resume();
+    }
 
     // Play a sequence of 3 loud beeps to get attention
     const frequencies = [880, 1046, 1318]; // A5, C6, E6 (pleasant chord)
@@ -213,24 +310,26 @@ function playLoudAlert() {
 
     frequencies.forEach((freq, index) => {
       window.setTimeout(() => {
-        const oscillator = audioContext.createOscillator();
-        const gainNode = audioContext.createGain();
+        if (!context) return;
+
+        const oscillator = context.createOscillator();
+        const gainNode = context.createGain();
 
         oscillator.connect(gainNode);
-        gainNode.connect(audioContext.destination);
+        gainNode.connect(context.destination);
 
         oscillator.frequency.value = freq;
         oscillator.type = 'sine';
 
         // Louder volume (0.5 instead of 0.3)
-        gainNode.gain.setValueAtTime(0.5, audioContext.currentTime);
+        gainNode.gain.setValueAtTime(0.5, context.currentTime);
         gainNode.gain.exponentialRampToValueAtTime(
           0.01,
-          audioContext.currentTime + 0.3
+          context.currentTime + 0.3
         );
 
-        oscillator.start(audioContext.currentTime);
-        oscillator.stop(audioContext.currentTime + 0.3);
+        oscillator.start(context.currentTime);
+        oscillator.stop(context.currentTime + 0.3);
       }, delays[index]);
     });
   } catch (error) {

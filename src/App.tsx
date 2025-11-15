@@ -27,8 +27,14 @@ function App() {
     restoreTimerState,
   } = useEggTimer();
 
-  const { permission, requestPermission, sendNotification } =
-    useNotifications();
+  const {
+    permission,
+    requestPermission,
+    sendNotification,
+    initializeAudio,
+    audioReady,
+    isIOS,
+  } = useNotifications();
 
   // Keep screen awake when timer is running or cooling
   const shouldStayAwake =
@@ -125,6 +131,13 @@ function App() {
     notificationBannerRef.current?.clearAll();
   };
 
+  const handleStartTimer = () => {
+    // Initialize audio context on iOS before starting timer
+    // This ensures audio can play during timer events
+    initializeAudio();
+    startTimer();
+  };
+
   // Determine if controls should be disabled
   const isTimerActive =
     state.status === 'running' || state.status === 'cooling';
@@ -138,7 +151,15 @@ function App() {
         {showPermissionBanner && permission === 'default' && (
           <div className="permission-banner">
             <p>Enable notifications to be alerted when to add eggs!</p>
-            {!window.isSecureContext && (
+            {isIOS && (
+              <p className="warning-text" style={{ fontSize: '0.9em' }}>
+                📱 On iPhone: For best results, add this app to your home
+                screen. Tap the Share button{' '}
+                <span style={{ fontSize: '1.2em' }}>⎋</span> and select
+                &quot;Add to Home Screen&quot;.
+              </p>
+            )}
+            {!isIOS && !window.isSecureContext && (
               <p className="warning-text" style={{ fontSize: '0.9em' }}>
                 ⚠️ Notifications may not work over HTTP. For full support, use
                 HTTPS.
@@ -184,7 +205,7 @@ function App() {
 
             <TimerControls
               state={state}
-              onStart={startTimer}
+              onStart={handleStartTimer}
               onPause={pauseTimer}
               onReset={resetTimer}
               onRemoveAllEggs={handleRemoveAllEggs}
@@ -203,6 +224,12 @@ function App() {
                 ? '✗ Denied'
                 : '○ Not set'}
           </strong>
+          {isIOS && (
+            <>
+              {' | '}
+              Audio: <strong>{audioReady ? '✓ Ready' : '○ Not ready'}</strong>
+            </>
+          )}
         </p>
       </footer>
     </div>

@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Generate PWA Icons</title>
+</head>
+<body>
+    <h1>PWA Icon Generator</h1>
+    <p>This will generate the required PWA icons. Right-click and save each image.</p>
+
+    <div>
+        <h2>192x192 Icon</h2>
+        <canvas id="icon192" width="192" height="192"></canvas>
+        <br>
+        <a id="download192" download="icon-192.png">
+            <button>Download 192x192</button>
+        </a>
+    </div>
+
+    <div>
+        <h2>512x512 Icon</h2>
+        <canvas id="icon512" width="512" height="512"></canvas>
+        <br>
+        <a id="download512" download="icon-512.png">
+            <button>Download 512x512</button>
+        </a>
+    </div>
+
+    <script>
+        function drawEggIcon(canvas) {
+            const ctx = canvas.getContext('2d');
+            const size = canvas.width;
+
+            // Background
+            ctx.fillStyle = '#4CAF50';
+            ctx.fillRect(0, 0, size, size);
+
+            // Egg shape
+            ctx.fillStyle = '#FFFFFF';
+            ctx.beginPath();
+
+            // Draw an egg shape using bezier curves
+            const centerX = size / 2;
+            const centerY = size / 2;
+            const width = size * 0.55;
+            const height = size * 0.7;
+
+            // Top of egg (narrower)
+            ctx.ellipse(
+                centerX,
+                centerY + size * 0.05,
+                width * 0.5,
+                height * 0.5,
+                0,
+                0,
+                Math.PI * 2
+            );
+            ctx.fill();
+
+            // Add a highlight
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+            ctx.beginPath();
+            ctx.ellipse(
+                centerX - size * 0.1,
+                centerY - size * 0.1,
+                width * 0.2,
+                height * 0.25,
+                -Math.PI / 6,
+                0,
+                Math.PI * 2
+            );
+            ctx.fill();
+        }
+
+        // Generate both icons
+        const canvas192 = document.getElementById('icon192');
+        const canvas512 = document.getElementById('icon512');
+
+        drawEggIcon(canvas192);
+        drawEggIcon(canvas512);
+
+        // Setup download links
+        document.getElementById('download192').href = canvas192.toDataURL('image/png');
+        document.getElementById('download512').href = canvas512.toDataURL('image/png');
+    </script>
+</body>
+</html>

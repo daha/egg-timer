@@ -1,0 +1,13 @@
+<svg width="192" height="192" viewBox="0 0 192 192" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="192" height="192" fill="#4CAF50"/>
+
+  <!-- Egg shape -->
+  <ellipse cx="96" cy="105.60000000000001" rx="51.84" ry="67.19999999999999" fill="#FFFFFF"/>
+
+  <!-- Highlight -->
+  <ellipse cx="76.80000000000001" cy="80.64" rx="15.36" ry="23.04" fill="#FFFFFF" opacity="0.4"/>
+
+  <!-- Text -->
+  <text x="96" y="172.8" font-family="Arial, sans-serif" font-size="23.04" fill="#FFFFFF" text-anchor="middle" font-weight="bold">EGG TIMER</text>
+</svg>
