@@ -37,6 +37,7 @@ export function getActiveNotifications(
   // Check for "add egg" notifications
   // Fire when we cross the threshold (handles timer skips from iOS throttling)
   // On first call (lastElapsedSeconds === -1), only fire for exact matches
+  // Only fire when timer is running
   timings.forEach((timing) => {
     const notificationKey = `add_egg_${timing.eggId}`;
     let shouldFire = false;
@@ -51,7 +52,11 @@ export function getActiveNotifications(
         lastElapsedSeconds < timing.addAtSecond;
     }
 
-    if (shouldFire && !sentNotifications.has(notificationKey)) {
+    if (
+      status === 'running' &&
+      shouldFire &&
+      !sentNotifications.has(notificationKey)
+    ) {
       const eggNumber = timings.findIndex((t) => t.eggId === timing.eggId) + 1;
       notifications.push({
         type: 'add_egg',
