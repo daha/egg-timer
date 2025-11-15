@@ -175,6 +175,54 @@ describe('notificationScheduler', () => {
       expect(notifications).toEqual([]);
     });
 
+    it('should fire "add egg" notification when timer starts (transitions from idle to running)', () => {
+      // Simulate adding an egg while timer is idle
+      let notifications = getActiveNotifications(
+        mockTimings,
+        0,
+        400,
+        0,
+        'idle'
+      );
+      expect(notifications).toEqual([]); // No notification while idle
+
+      // Now start the timer - should fire notification for first egg
+      notifications = getActiveNotifications(mockTimings, 0, 400, 0, 'running');
+
+      expect(notifications).toHaveLength(1);
+      expect(notifications[0]).toEqual({
+        type: 'add_egg',
+        message: 'Add egg #1 to the pot now!',
+        eggId: 'egg1',
+      });
+    });
+
+    it('should fire "boiling done" notification correctly after idle transition', () => {
+      // Simulate being idle first
+      getActiveNotifications(mockTimings, 0, 400, 0, 'idle');
+
+      // Start timer
+      getActiveNotifications(mockTimings, 0, 400, 0, 'running');
+
+      // Progress to near the end
+      getActiveNotifications(mockTimings, 399, 400, 0, 'running');
+
+      // Reach boiling done
+      const notifications = getActiveNotifications(
+        mockTimings,
+        400,
+        400,
+        0,
+        'running'
+      );
+
+      expect(notifications).toHaveLength(1);
+      expect(notifications[0]).toEqual({
+        type: 'boiling_done',
+        message: 'All eggs are done boiling! Move them to cold water.',
+      });
+    });
+
     it(`should return "cooling done" notification when cooling elapsed is ${COOLING_TIME_SECONDS} seconds`, () => {
       const notifications = getActiveNotifications(
         mockTimings,
