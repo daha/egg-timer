@@ -1,17 +1,13 @@
-name: Deploy to GitHub Pages
+name: PR Checks
 
 on:
-  push:
+  pull_request:
     branches:
       - main
 
-permissions:
-  contents: read
-  pages: write
-  id-token: write
-
 jobs:
-  build:
+  quality-checks:
+    name: Quality Checks
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -41,18 +37,14 @@ jobs:
       - name: Build
         run: npm run build
 
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: ./dist
-
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+      - name: Check for build artifacts
+        run: |
+          if [ ! -d "dist" ]; then
+            echo "Build directory not found!"
+            exit 1
+          fi
+          if [ ! -f "dist/index.html" ]; then
+            echo "index.html not found in build!"
+            exit 1
+          fi
+          echo "Build artifacts verified successfully"

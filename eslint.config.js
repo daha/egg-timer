@@ -7,9 +7,32 @@ import prettier from 'eslint-config-prettier';
 
 export default [
   {
-    ignores: ['dist', 'node_modules', '*.config.js', '*.config.ts'],
+    ignores: [
+      'dist',
+      'node_modules',
+      '*.config.js',
+      '*.config.ts',
+      'scripts/**/*.js',
+      'scripts/**/*.html',
+    ],
   },
   js.configs.recommended,
+  // Service Worker specific configuration
+  {
+    files: ['public/sw.js', '**/sw.js', '**/service-worker.js'],
+    languageOptions: {
+      globals: {
+        self: 'readonly',
+        caches: 'readonly',
+        clients: 'readonly',
+        console: 'readonly',
+        fetch: 'readonly',
+        skipWaiting: 'readonly',
+        addEventListener: 'readonly',
+      },
+      sourceType: 'script',
+    },
+  },
   {
     files: ['**/*.{ts,tsx}'],
     languageOptions: {
