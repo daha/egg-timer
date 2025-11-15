@@ -23,7 +23,7 @@ export function resetNotificationState(): void {
 export function getActiveNotifications(
   timings: EggTiming[],
   elapsedSeconds: number,
-  totalTime: number,
+  _totalTime: number, // Unused but kept for API consistency
   coolingElapsed: number,
   status: TimerState['status']
 ): Notification[] {
@@ -75,22 +75,14 @@ export function getActiveNotifications(
   });
 
   // Check for "boiling done" notification
-  // Fire when we cross totalTime threshold
+  // Fire when we transition from running to cooling (boiling just completed)
   const boilingDoneKey = 'boiling_done';
-  let shouldFireBoilingDone = false;
+  const justFinishedBoiling =
+    status === 'cooling' &&
+    lastStatus === 'running' &&
+    !sentNotifications.has(boilingDoneKey);
 
-  if (lastElapsedSeconds === -1) {
-    shouldFireBoilingDone = elapsedSeconds === totalTime;
-  } else {
-    shouldFireBoilingDone =
-      elapsedSeconds >= totalTime && lastElapsedSeconds < totalTime;
-  }
-
-  if (
-    status === 'running' &&
-    shouldFireBoilingDone &&
-    !sentNotifications.has(boilingDoneKey)
-  ) {
+  if (justFinishedBoiling) {
     notifications.push({
       type: 'boiling_done',
       message: 'All eggs are done boiling! Move them to cold water.',
