@@ -135,13 +135,17 @@ describe('notificationScheduler', () => {
       });
     });
 
-    it('should return "boiling done" notification when timer reaches total time', () => {
+    it('should return "boiling done" notification when transitioning to cooling', () => {
+      // First, simulate being in running state
+      getActiveNotifications(mockTimings, 399, 400, 0, 'running');
+
+      // Now transition to cooling (this is when boiling completes)
       const notifications = getActiveNotifications(
         mockTimings,
         400, // elapsedSeconds - matches totalTime
         400, // totalTime
-        0,
-        'running'
+        0, // coolingElapsed
+        'cooling' // status transitions to cooling
       );
 
       expect(notifications).toHaveLength(1);
@@ -151,13 +155,17 @@ describe('notificationScheduler', () => {
       });
     });
 
-    it('should not return "boiling done" when status is not running', () => {
+    it('should not return "boiling done" when already in cooling state', () => {
+      // Simulate already being in cooling state (not transitioning)
+      getActiveNotifications(mockTimings, 400, 400, 0, 'cooling');
+
+      // Call again while still in cooling
       const notifications = getActiveNotifications(
         mockTimings,
         400,
         400,
-        0,
-        'cooling' // status is cooling, not running
+        1, // coolingElapsed has progressed
+        'cooling'
       );
 
       expect(notifications).toEqual([]);
@@ -207,13 +215,13 @@ describe('notificationScheduler', () => {
       // Progress to near the end
       getActiveNotifications(mockTimings, 399, 400, 0, 'running');
 
-      // Reach boiling done
+      // Transition to cooling (boiling complete)
       const notifications = getActiveNotifications(
         mockTimings,
         400,
         400,
         0,
-        'running'
+        'cooling' // Status transitions to cooling when boiling completes
       );
 
       expect(notifications).toHaveLength(1);
@@ -223,24 +231,8 @@ describe('notificationScheduler', () => {
       });
     });
 
-    it(`should return "cooling done" notification when cooling elapsed is ${COOLING_TIME_SECONDS} seconds`, () => {
-      const notifications = getActiveNotifications(
-        mockTimings,
-        400,
-        400,
-        COOLING_TIME_SECONDS, // coolingElapsed
-        'cooling'
-      );
-
-      expect(notifications).toHaveLength(1);
-      expect(notifications[0]).toEqual({
-        type: 'cooling_done',
-        message: 'Cooling complete! Your eggs are ready.',
-      });
-    });
-
-    it('should return "cooling done" notification even if timer skips past the exact second', () => {
-      // First, simulate being just before the threshold
+    it('should return "cooling done" notification when transitioning to complete', () => {
+      // First, simulate being in cooling state
       getActiveNotifications(
         mockTimings,
         400,
@@ -249,13 +241,13 @@ describe('notificationScheduler', () => {
         'cooling'
       );
 
-      // Then skip past the threshold
+      // Now transition to complete (this is when cooling finishes)
       const notifications = getActiveNotifications(
         mockTimings,
         400,
         400,
-        COOLING_TIME_SECONDS + 2, // Skip 2 seconds past
-        'cooling'
+        COOLING_TIME_SECONDS, // coolingElapsed
+        'complete' // Status transitions to complete when cooling finishes
       );
 
       expect(notifications).toHaveLength(1);
@@ -265,37 +257,70 @@ describe('notificationScheduler', () => {
       });
     });
 
-    it('should not return "cooling done" when status is not cooling', () => {
+    it('should not return "cooling done" when already in complete state', () => {
+      // Simulate already being in complete state (not transitioning)
+      getActiveNotifications(
+        mockTimings,
+        400,
+        400,
+        COOLING_TIME_SECONDS,
+        'complete'
+      );
+
+      // Call again while still in complete
       const notifications = getActiveNotifications(
         mockTimings,
         400,
         400,
         COOLING_TIME_SECONDS,
-        'running' // status is running, not cooling
+        'complete'
       );
 
-      // Should only return boiling_done, not cooling_done
-      expect(notifications).toHaveLength(1);
-      expect(notifications[0].type).toBe('boiling_done');
+      expect(notifications).toEqual([]);
     });
 
-    it('should handle multiple simultaneous notifications', () => {
-      // If somehow an egg needs to be added at the same time boiling is done
+    it('should not return "cooling done" when not transitioning from cooling to complete', () => {
+      // Setup: go through normal flow
+      getActiveNotifications(mockTimings, 399, 400, 0, 'running');
+      getActiveNotifications(mockTimings, 400, 400, 0, 'cooling');
+
+      // Hypothetical: transition to 'running' instead of 'complete'
+      // (This shouldn't happen in practice, but tests the status check)
+      const notifications = getActiveNotifications(
+        mockTimings,
+        400,
+        400,
+        COOLING_TIME_SECONDS,
+        'running' // Not transitioning to 'complete'
+      );
+
+      // Should not fire cooling_done because we didn't transition cooling -> complete
+      expect(notifications).toEqual([]);
+    });
+
+    it('should handle boiling done notification on transition to cooling', () => {
+      // Simulate timer running then transitioning to cooling
       const timings: EggTiming[] = [
-        { eggId: 'egg1', boilTime: 400, addAtSecond: 400 },
+        { eggId: 'egg1', boilTime: 400, addAtSecond: 0 },
       ];
 
+      // First, start the timer
+      getActiveNotifications(timings, 0, 400, 0, 'running');
+
+      // Then progress to near end
+      getActiveNotifications(timings, 399, 400, 0, 'running');
+
+      // Finally, transition to cooling
       const notifications = getActiveNotifications(
         timings,
         400,
         400,
         0,
-        'running'
+        'cooling'
       );
 
-      expect(notifications).toHaveLength(2);
-      expect(notifications.map((n) => n.type)).toContain('add_egg');
-      expect(notifications.map((n) => n.type)).toContain('boiling_done');
+      expect(notifications).toHaveLength(1);
+      expect(notifications[0].type).toBe('boiling_done');
     });
 
     it('should handle empty timings array', () => {

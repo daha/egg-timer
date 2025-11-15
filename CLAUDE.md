@@ -14,7 +14,7 @@ This is an egg timer web application designed to help users boil multiple eggs w
 - Calculate staggered start times so all eggs finish together
 - Browser notifications for when to add each egg to the pot
 - Notification when eggs are done boiling
-- 2-minute cooling timer reminder after boiling completes
+- 2.5-minute cooling timer reminder after boiling completes
 - Progressive Web App (PWA) with service worker support
 - Persistent state using localStorage
 - Wake Lock API to keep screen active during timing
@@ -24,6 +24,7 @@ This is an egg timer web application designed to help users boil multiple eggs w
 ## Technology Stack
 
 ### Core Technologies
+
 - **Framework:** React 18.3+ with TypeScript 5.6+
 - **Build Tool:** Vite 6.0+
 - **Testing:** Vitest 4.0+ with @testing-library/react
@@ -32,6 +33,7 @@ This is an egg timer web application designed to help users boil multiple eggs w
 - **Git Hooks:** Husky 9.1+ with lint-staged
 
 ### Browser APIs Used
+
 - **Notifications API:** For alerting users when to add eggs
 - **Wake Lock API:** Prevents screen from sleeping during active timer
 - **Web Storage API:** localStorage for persisting timer state and eggs
@@ -111,16 +113,19 @@ t = 197 + 4.6 * w
 ```
 
 where:
+
 - `t` = time in seconds
 - `w` = weight of the egg in grams
 
 **Doneness Adjustments:**
+
 - Soft boiled: -30 seconds
 - Medium boiled: 0 seconds (baseline)
 - Harder boiled: +45 seconds
 - Hard boiled: +90 seconds
 
 **Temperature Adjustments:**
+
 - Refrigerated eggs (~6°C): 0 seconds (baseline)
 - Room temperature eggs (~20°C): -30 seconds
 
@@ -131,9 +136,11 @@ where:
 ### Initial Setup
 
 1. **Clone and install dependencies:**
+
    ```bash
    npm install
    ```
+
    This automatically runs the `prepare` script which initializes Husky git hooks.
 
 2. **Verify hooks are installed:**
@@ -207,12 +214,14 @@ npm run format:check     # Check code formatting
 **Base Path:** `/egg-timer/` (configured in `vite.config.ts`)
 
 **Deployment Process:**
+
 1. Push to `main` branch
 2. GitHub Actions runs all quality checks
 3. If all checks pass, builds and deploys to GitHub Pages
 4. Live site updates automatically
 
 **GitHub Pages Setup:**
+
 - Settings → Pages → Source: **GitHub Actions**
 - Workflow: `.github/workflows/deploy.yml`
 
@@ -221,6 +230,7 @@ npm run format:check     # Check code formatting
 ### Test Organization
 
 Tests mirror the `src/` directory structure:
+
 - `tests/components/` - React component tests
 - `tests/hooks/` - Custom hook tests
 - `tests/core/` - Business logic tests
@@ -230,6 +240,7 @@ Tests mirror the `src/` directory structure:
 ### Test Requirements
 
 All code should have unit tests where applicable:
+
 - **Core business logic:** 100% coverage expected
 - **Hooks:** Test state management and side effects
 - **Components:** Test user interactions and rendering
@@ -252,6 +263,7 @@ npm run test:ui
 ```
 
 **Test Configuration:** `vitest.config.ts`
+
 - Environment: jsdom
 - Setup file: `tests/setup.ts`
 - Timeout: 15 seconds (for timer-based tests)
@@ -268,6 +280,7 @@ npm run test:ui
 ### ESLint Configuration
 
 See `eslint.config.js` for full configuration:
+
 - TypeScript recommended rules
 - React recommended rules
 - React Hooks rules
@@ -277,6 +290,7 @@ See `eslint.config.js` for full configuration:
 ### Prettier Configuration
 
 See `.prettierrc`:
+
 - **Semi-colons:** Required (`;`)
 - **Quotes:** Single quotes (`'`)
 - **Trailing commas:** ES5-compatible
@@ -404,21 +418,25 @@ export function EggForm({ onAddEgg }: Props) {
 ### Common Issues
 
 **Build Failures:**
+
 - Check TypeScript errors: `npx tsc --noEmit`
 - Check ESLint: `npm run lint`
 - Check Prettier: `npm run format:check`
 
 **Test Failures in CI:**
+
 - Run locally first: `npm run test -- --run`
 - Check for timing-dependent tests (use fake timers)
 - Verify jsdom environment compatibility
 
 **Notification Issues:**
+
 - HTTPS required for production (HTTP may not work)
 - iOS requires PWA installation for best results
 - Check browser compatibility (modern browsers only)
 
 **localStorage Issues:**
+
 - Check browser privacy settings
 - Clear storage for fresh start: `localStorage.clear()`
 - Handle quota exceeded errors

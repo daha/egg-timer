@@ -80,6 +80,8 @@ function App() {
   });
 
   // Calculate active notifications based on current state
+  // Called once per render - getActiveNotifications maintains internal state
+  // to ensure each notification is only returned once
   const notifications = getActiveNotifications(
     state.timings,
     state.elapsedSeconds,
@@ -88,27 +90,30 @@ function App() {
     state.status
   );
 
-  // Send browser notifications when there are active notifications
-  // This effect only triggers notifications (side effect), doesn't update state
+  // Send browser notifications and play sounds when new notifications arrive
+  // Include all state that affects notifications in dependencies
   useEffect(() => {
     if (notifications.length > 0) {
+      console.log('[Egg Timer] Sending notifications:', notifications);
       notifications.forEach((notification) => {
         sendNotification(notification);
       });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
+    state.timings,
     state.elapsedSeconds,
+    state.totalTime,
     state.coolingElapsed,
     state.status,
-    // We intentionally don't include 'notifications' to avoid triggering
-    // on every render. We only want to send notifications when timer state changes.
+    notifications,
     sendNotification,
   ]);
 
   // Auto-dismiss banner if permission is granted or denied
   useEffect(() => {
     if (permission !== 'default') {
+      // This is intentional - we want to auto-dismiss when permission changes
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setDismissedPermissionBanner(true);
     }
   }, [permission]);
@@ -230,6 +235,10 @@ function App() {
               Audio: <strong>{audioReady ? '✓ Ready' : '○ Not ready'}</strong>
             </>
           )}
+        </p>
+        <p className="app-version">
+          Version:{' '}
+          {import.meta.env.VITE_GIT_COMMIT_SHA?.substring(0, 7) || 'dev'}
         </p>
       </footer>
     </div>

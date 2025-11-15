@@ -9,22 +9,20 @@ const sentNotifications = new Set<string>();
 
 // Track the last state to detect transitions
 let lastElapsedSeconds = -1;
-let lastCoolingElapsed = -1;
 let lastStatus: TimerState['status'] = 'idle';
 
 // Reset notification state (useful for tests and when timer truly resets)
 export function resetNotificationState(): void {
   sentNotifications.clear();
   lastElapsedSeconds = -1;
-  lastCoolingElapsed = -1;
   lastStatus = 'idle';
 }
 
 export function getActiveNotifications(
   timings: EggTiming[],
   elapsedSeconds: number,
-  totalTime: number,
-  coolingElapsed: number,
+  _totalTime: number, // Unused but kept for API consistency
+  _coolingElapsed: number, // Unused but kept for API consistency
   status: TimerState['status']
 ): Notification[] {
   const notifications: Notification[] = [];
@@ -38,7 +36,6 @@ export function getActiveNotifications(
   // This ensures notifications fire correctly when timer starts
   if (status === 'running' && lastStatus === 'idle') {
     lastElapsedSeconds = -1;
-    lastCoolingElapsed = -1;
   }
 
   // Check for "add egg" notifications
@@ -75,22 +72,14 @@ export function getActiveNotifications(
   });
 
   // Check for "boiling done" notification
-  // Fire when we cross totalTime threshold
+  // Fire when we transition from running to cooling (boiling just completed)
   const boilingDoneKey = 'boiling_done';
-  let shouldFireBoilingDone = false;
+  const justFinishedBoiling =
+    status === 'cooling' &&
+    lastStatus === 'running' &&
+    !sentNotifications.has(boilingDoneKey);
 
-  if (lastElapsedSeconds === -1) {
-    shouldFireBoilingDone = elapsedSeconds === totalTime;
-  } else {
-    shouldFireBoilingDone =
-      elapsedSeconds >= totalTime && lastElapsedSeconds < totalTime;
-  }
-
-  if (
-    status === 'running' &&
-    shouldFireBoilingDone &&
-    !sentNotifications.has(boilingDoneKey)
-  ) {
+  if (justFinishedBoiling) {
     notifications.push({
       type: 'boiling_done',
       message: 'All eggs are done boiling! Move them to cold water.',
@@ -99,23 +88,14 @@ export function getActiveNotifications(
   }
 
   // Check for "cooling done" notification
-  // Fire when we cross cooling time threshold
+  // Fire when we transition from cooling to complete (cooling just finished)
   const coolingDoneKey = 'cooling_done';
-  let shouldFireCoolingDone = false;
+  const justFinishedCooling =
+    status === 'complete' &&
+    lastStatus === 'cooling' &&
+    !sentNotifications.has(coolingDoneKey);
 
-  if (lastCoolingElapsed === -1) {
-    shouldFireCoolingDone = coolingElapsed === COOLING_TIME_SECONDS;
-  } else {
-    shouldFireCoolingDone =
-      coolingElapsed >= COOLING_TIME_SECONDS &&
-      lastCoolingElapsed < COOLING_TIME_SECONDS;
-  }
-
-  if (
-    status === 'cooling' &&
-    shouldFireCoolingDone &&
-    !sentNotifications.has(coolingDoneKey)
-  ) {
+  if (justFinishedCooling) {
     notifications.push({
       type: 'cooling_done',
       message: 'Cooling complete! Your eggs are ready.',
@@ -125,7 +105,6 @@ export function getActiveNotifications(
 
   // Update tracking
   lastElapsedSeconds = elapsedSeconds;
-  lastCoolingElapsed = coolingElapsed;
   lastStatus = status;
 
   return notifications;
