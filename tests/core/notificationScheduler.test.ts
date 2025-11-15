@@ -163,6 +163,18 @@ describe('notificationScheduler', () => {
       expect(notifications).toEqual([]);
     });
 
+    it('should not return "add egg" notification when status is idle', () => {
+      const notifications = getActiveNotifications(
+        mockTimings,
+        0, // elapsedSeconds matches egg1's addAtSecond
+        400,
+        0,
+        'idle' // status is idle, not running
+      );
+
+      expect(notifications).toEqual([]);
+    });
+
     it(`should return "cooling done" notification when cooling elapsed is ${COOLING_TIME_SECONDS} seconds`, () => {
       const notifications = getActiveNotifications(
         mockTimings,
