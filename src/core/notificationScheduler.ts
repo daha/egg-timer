@@ -34,6 +34,13 @@ export function getActiveNotifications(
     sentNotifications.clear();
   }
 
+  // Reset tracking when timer starts (status changes from idle to running)
+  // This ensures notifications fire correctly when timer starts
+  if (status === 'running' && lastStatus === 'idle') {
+    lastElapsedSeconds = -1;
+    lastCoolingElapsed = -1;
+  }
+
   // Check for "add egg" notifications
   // Fire when we cross the threshold (handles timer skips from iOS throttling)
   // On first call (lastElapsedSeconds === -1), only fire for exact matches
