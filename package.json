@@ -9,7 +9,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
-    "preview": "vite preview",
+    "preview": "vite preview --base /egg-timer/",
     "test": "vitest",
     "test:ui": "vitest --ui",
     "lint": "eslint . --ext .ts,.tsx",
