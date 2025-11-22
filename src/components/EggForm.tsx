@@ -78,7 +78,7 @@ export function EggForm({ onAddEgg, disabled }: EggFormProps) {
             >
               <option value="soft">Soft</option>
               <option value="medium">Medium</option>
-              <option value="harder">Harder</option>
+              <option value="harder">Medium hard</option>
               <option value="hard">Hard</option>
             </select>
           </label>
